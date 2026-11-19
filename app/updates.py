@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Release checks and verified downloads; installation always requires a user action."""
 from __future__ import annotations
 
@@ -19,7 +21,7 @@ from storage import VERSION
 urlopen = build_opener(ProxyHandler({})).open
 
 
-# Public release-only repository verified for MG-RELAY-UPDATE-SOURCE-001.
+# Public release-only repository verified for .
 # This product has its own release feed, isolated from future MicroGlow products.
 GITHUB_REPOSITORY = "mazda6hk-coder/MicroGlow-Relay"
 WEBSITE_MANIFEST = "https://www.microglow.com.cn/updates/relay/windows-x64.json"

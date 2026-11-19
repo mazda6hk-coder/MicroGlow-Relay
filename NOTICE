@@ -1,0 +1,20 @@
+MicroGlow Relay
+Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+郑州微光智能科技中心
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+The following are licensed separately and are NOT covered by the Apache License:
+
+- Seasonal illustrations, skin artwork, marketing images and other visual
+  assets: Creative Commons Attribution-NonCommercial-NoDerivatives 4.0
+  International (CC BY-NC-ND 4.0). See ARTWORK-LICENSE.md.
+- The names "MicroGlow", "MicroGlow Relay", "Relay" and the MicroGlow logo:
+  see TRADEMARKS.md. No trademark rights are granted by either license.
+
+Third-party components remain under their own licenses. See
+THIRD_PARTY_NOTICES.md and docs/licenses/.
+
+This software is an independent project. It is not affiliated with, endorsed
+by, or sponsored by OpenAI or Anthropic. "Codex" and "Claude Code" are
+referenced only to describe client compatibility.

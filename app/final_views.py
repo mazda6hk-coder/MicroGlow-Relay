@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Approved fixed-canvas views, reusing the existing gateway and action handlers.
 
 All coordinates are design pixels. Scaling belongs to the shell, never to a page.

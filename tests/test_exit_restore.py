@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Real configuration files and async quit callbacks; isolated client homes only."""
 from pathlib import Path
 import json

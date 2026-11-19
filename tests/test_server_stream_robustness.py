@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """MG-RELAY-SERVER-AUDIT 回归：上游事件流健壮性、模型解析口径、分块请求体。"""
 from __future__ import annotations
 

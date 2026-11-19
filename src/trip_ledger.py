@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Trip 账本（任务书第 5 节）：清零快照的本地持久账。
 
 「汽车小计」的完整隐喻还差一块：清零前的那段旅程应该记进总账本，而不是

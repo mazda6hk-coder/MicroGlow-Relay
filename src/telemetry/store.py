@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """SQLite-backed daily aggregates and durable local upload batches."""
 from __future__ import annotations
 
@@ -294,7 +296,7 @@ def _row_payload(row: sqlite3.Row, schema_version: int) -> dict:
 
 @dataclass(frozen=True, slots=True)
 class UploadResponse:
-    """Transport-neutral result for the MG-RELAY-003-B implementation."""
+    """Transport-neutral result for the  implementation."""
 
     status_code: int | None = None
     body: dict | None = None

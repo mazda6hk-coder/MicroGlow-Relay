@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """实时日志的行高：单行紧凑、长报错不截断。
 
 业主反馈日志面板行距过大（实测每行 52px，一屏仅 8.9 行），本用例固化收窄后的口径。
@@ -96,7 +98,7 @@ class LogRowTests(unittest.TestCase):
         self.assertEqual(widget.spacing(), 0)
 
     def test_request_row_names_the_routed_model(self):
-        """MG-RELAY-05-UI-001：0.5 允许一条会话内切模型，实时日志必须写明模型名。"""
+        """0.5 允许一条会话内切模型，实时日志必须写明模型名。"""
         widget = self._render([SHORT_EVENT])
         self.assertIn("demo-model", widget.item(0).text())
         # 没有模型名时不能留下悬空分隔符。

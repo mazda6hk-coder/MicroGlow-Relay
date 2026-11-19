@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Run final-design regressions in separate processes to release Qt/worker state."""
 from pathlib import Path
 import json

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """开机自启（任务书第 8 节）：HKCU Run 项，不写系统级注册表、不要管理员权限。
 
 非 Windows 平台一律视为"不支持"，界面据此把开关灰掉——不假装成功。

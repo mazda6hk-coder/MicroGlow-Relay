@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """形状教训缓存 + 关闭渠道不进入可选列表。"""
 from __future__ import annotations
 import sys, time, unittest, tempfile

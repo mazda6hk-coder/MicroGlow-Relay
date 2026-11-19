@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Widgets measured in the approved 1340 x 900 design coordinate system."""
 from __future__ import annotations
 

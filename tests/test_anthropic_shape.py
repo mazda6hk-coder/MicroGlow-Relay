@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Anthropic 协议适配的形状约束：角色交替与 thinking 预算合法性。
 
 背景：并行工具调用在 _chat_messages 里会产出连续的 tool 角色消息，

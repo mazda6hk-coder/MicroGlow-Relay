@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """推理项形态判定：当前轮 assistant 侧条目必须紧邻合规推理项。
 
 规则来自 2026-10-11 对 api.deepseek.com 的直连实测

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Revision acceptance: naming, capacities, channel removal and translated layouts."""
 import sys
 from pathlib import Path

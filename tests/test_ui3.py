@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Interface tests for the redesigned Qt shell.
 
 The tests run against the offscreen Qt platform so they stay headless.
@@ -708,7 +710,7 @@ class ModelSelectionTests(UiTestCase):
         self.assertTrue(page.row_controls[second["id"]]["badge"].isHidden())
         with patch.object(page, "open_dialog") as edit, patch.object(page, "remove_profile") as remove:
             page.row_controls[second["id"]]["edit"].click()
-            # MG-RELAY-05-UI-001：非默认行的菜单第一项改成了「设为默认模型」，
+            # 非默认行的菜单第一项改成了「设为默认模型」，
             # 删除退到第二项。点错位置会把「设默认」当成「删除」，所以按下标断言。
             menu = page.row_controls[second["id"]]["menu"]
             menu.actions()[1].trigger()

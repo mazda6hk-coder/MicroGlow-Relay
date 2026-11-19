@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Small, bounded telemetry stores. Request and response bodies are never saved."""
 from __future__ import annotations
 

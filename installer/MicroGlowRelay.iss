@@ -1,3 +1,5 @@
+; Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+; SPDX-License-Identifier: Apache-2.0
 ; Per-user installer. Build with build-installer.ps1 after the EXE exists.
 #ifndef AppVersion
   #error AppVersion must be provided by build-installer.ps1

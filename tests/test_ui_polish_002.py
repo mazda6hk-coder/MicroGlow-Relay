@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Isolated information architecture checks."""
 from pathlib import Path
 from test_ui3 import UiTestCase, sample

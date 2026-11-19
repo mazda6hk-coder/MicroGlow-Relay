@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Record focused gateway regressions separately from prior UI tasks."""
 from pathlib import Path
 import sys

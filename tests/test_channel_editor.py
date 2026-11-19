@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """UI-090-CHANNEL-EDITOR: ProfileDialog 渠道组编辑器（任务书第 6 节）。
 
 - 添加/删除渠道行、表单收集（跳过空地址行）；

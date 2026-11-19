@@ -1,4 +1,6 @@
-"""MG-RELAY-THREAD-001: Gateway 生命周期不得泄漏后台线程。
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
+"""Gateway 生命周期不得泄漏后台线程。
 
 背景：`Gateway(settings)` 默认附带本地聚合线程（microglow-telemetry-local），
 旧实现没有任何收尾路径——每个实例留一条永不退出的守护线程，还攥着

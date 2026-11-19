@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Release metadata for this source candidate; not a claim of public release."""
 # app/__init__.py 已把 src 放进 sys.path（frozen 时 PyInstaller 已收集）。
 from storage import VERSION  # noqa: E402  (single source of truth)

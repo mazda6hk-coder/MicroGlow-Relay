@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Application shell: frameless window, sidebar navigation, tray integration."""
 from __future__ import annotations
 
@@ -373,7 +375,7 @@ class Shell(QWidget):
             self.pages[key] = page
             self.stack.addWidget(page)
         # The Codex power switch and caption stay on the dashboard; the clients
-        # page itself is a normal nav page since MG-RELAY-CLAUDE-ACCESS-001.
+        # page itself is a normal nav page since .
         connection = self.pages["codex"]
         dashboard = self.pages["dashboard"]
         # 0.9 Hero（任务书 4）：三开关并排——Relay / Codex 接入 / Claude 接入，

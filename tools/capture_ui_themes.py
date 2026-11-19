@@ -1,6 +1,8 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Render every 0.5 page under every theme so the visual pass is evidence, not memory.
 
-MG-RELAY-05-UI-001的验收物：七主题 × 四页面实际运行截图。脚本只读配置、
+001的验收物：七主题 × 四页面实际运行截图。脚本只读配置、
 不发起任何上游请求；模型与用量都是合成数据，避免把真实地址或密钥写进图片。
 """
 from __future__ import annotations

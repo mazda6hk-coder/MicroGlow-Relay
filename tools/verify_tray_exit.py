@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Isolated real Qt event-loop exit check. Never starts a model request or opens user data."""
 from __future__ import annotations
 

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Static desktop UI translations; no network at runtime."""
 TRANSLATIONS = {'de': {
         '检测到更高优先级的 Claude 配置：{0} · 可能覆盖 Relay 接入，未改动': 'Claude-Konfiguration mit höherer Priorität gefunden: {0} · kann den Relay-Zugriff übersteuern (unverändert gelassen)','\n目标模型：{0}': 'Zielmodell: {0}',
@@ -2829,7 +2831,7 @@ from .translation_overrides import OVERRIDES as _REVIEWED_TRANSLATIONS
 for _code, _values in _REVIEWED_TRANSLATIONS.items():
     TRANSLATIONS[_code].update(_values)
 
-# ---- MG-RELAY-TRIPTOKEN-001：Token 小计（TRIP A / B）
+# ---- Token 小计（TRIP A / B）
 # 顺序与 _TRIP_KEYS 一一对应，zip 装配，避免键值错位。
 _TRIP_KEYS = ('Token 小计', '清零', '清零只重置小计，不影响日总量与历史记录',
               '入 {0}　出 {1}　{2} 次　·　已累计 {3}', '刚刚',
@@ -3082,7 +3084,7 @@ for _code, _values in _UNDO_BAR_TRANSLATIONS.items():
     TRANSLATIONS[_code].update(zip(_UNDO_BAR_KEYS, _values))
 
 # ---------------------------------------------------------------------------
-# 顶栏骨架文案（UI-090-SKELETON，任务书第 1 节）。
+# 顶栏骨架文案（任务书第 1 节）。
 # ---------------------------------------------------------------------------
 _SKELETON_KEYS = ('SETUP',)
 # SETUP 作为专有页名保留原文（各语言一致），但登记进目录避免看门狗漏检。
@@ -3113,7 +3115,7 @@ for _code, _values in _DAYNIGHT_TIP_TRANSLATIONS.items():
     TRANSLATIONS[_code].update(zip(_DAYNIGHT_TIP_KEYS, _values))
 
 # ---------------------------------------------------------------------------
-# 日志页三分类 + SETUP 客户端接入（UI-090-LOGS-SETUP，任务书第 7/8 节）。
+# 日志页三分类 + SETUP 客户端接入（任务书第 7/8 节）。
 # ---------------------------------------------------------------------------
 _LOGS_SETUP_KEYS = (
     '已为你化解波动',

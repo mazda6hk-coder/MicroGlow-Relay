@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """CONNECT-001: local disclosure gate and immutable channel batch transport."""
 from datetime import datetime, timezone
 import json

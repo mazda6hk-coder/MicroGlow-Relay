@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """工具形状三层兼容：已知快洗 + 反应式读错自修 + 兜底收敛。
 
 背景：Codex 每版可能新增私有工具载体/字段（custom format、oneOf schema、

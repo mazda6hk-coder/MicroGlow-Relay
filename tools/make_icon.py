@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Derive transparent idle/transfer icons from the approved brand artwork."""
 from __future__ import annotations
 

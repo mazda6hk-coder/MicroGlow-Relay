@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Trip 账本 + 缓存读写拆分 + 恢复读数（任务书第 5 节后端）。"""
 from __future__ import annotations
 

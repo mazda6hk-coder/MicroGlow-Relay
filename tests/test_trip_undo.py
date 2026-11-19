@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """UI-090-TRIP-UNDO: 清零撤销与账本快照（任务书第 5 节）。
 
 - 清零即快照入账本，账本数字与清零前显示完全一致（构造保证）；

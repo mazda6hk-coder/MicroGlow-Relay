@@ -1,7 +1,8 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Minimal HTTP transport for telemetry batches (stdlib only).
 
-Design constraints carried over from MG-RELAY-003-A:
-
+Design constraints carried over from 
 * Only aggregated counters are ever serialised; no prompt, response, key or IP.
 * Every failure is silent and returns a transport-neutral ``UploadResponse``;
   the batch stays local and retryable - nothing is deleted, nothing is logged.

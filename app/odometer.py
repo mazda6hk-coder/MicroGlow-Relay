@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Twelve mechanical drums with a fixed hundred-million highlight."""
 from __future__ import annotations
 import time

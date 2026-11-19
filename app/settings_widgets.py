@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Native theme tiles; thumbnails are isolated captures of the actual themes."""
 from pathlib import Path
 import sys

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """namespace 双向映射回归：出站合并、回程拆分，保证 Codex 两段识别。"""
 from __future__ import annotations
 import sys, unittest

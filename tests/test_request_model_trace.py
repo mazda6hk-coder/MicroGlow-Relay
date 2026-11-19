@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """请求侧模型留痕：日志行要能区分「Codex 说用哪个模型」和「实际打到哪个出口」。
 
 背景是一次真实投诉：在 Codex 里给多个会话选了模型，任务跑起来发现不是最初选中的那个。

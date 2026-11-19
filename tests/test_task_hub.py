@@ -1,4 +1,6 @@
-"""MG-RELAY-TASKHUB-001: worker 结果必须回主线程派发。
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
+"""worker 结果必须回主线程派发。
 
 背景：任务（拉模型、连接测试）比页面活得久。旧的「每任务一对信号」写法
 下，worker 线程会在页面销毁后直接调用裸 lambda 回调——C++ 侧没有 receiver

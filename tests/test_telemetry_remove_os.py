@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """No system collection in new batches; sealed legacy retries stay immutable."""
 import json
 from pathlib import Path

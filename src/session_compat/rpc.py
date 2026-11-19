@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Restricted local Codex App Server transport. Never exposes raw responses."""
 from __future__ import annotations
 

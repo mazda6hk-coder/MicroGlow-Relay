@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Every theme uses the requested 1.5x scrollbar width."""
 
 from pathlib import Path

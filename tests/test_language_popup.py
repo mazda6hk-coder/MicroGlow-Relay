@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Exercise the popup through the scaled scene and actual mouse events."""
 from pathlib import Path
 import sys

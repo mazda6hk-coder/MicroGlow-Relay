@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """跨供应商推理续接：密文只有产出它的上游解得开。
 
 2026-10-16 复现的真实故障：一个由 Codex 原生模型（gpt-6-sol）建立的会话，

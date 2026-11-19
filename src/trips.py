@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """分段 Token 计数（TRIP A / B）。
 
 与汽车的小计里程表同构：随时清零，从零累计，跨自然日、跨重启都不中断。

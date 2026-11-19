@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Offline translations for the final interface. IDs and local names stay intact."""
 CODES = ("zh-TW", "en", "de", "ja", "th", "es", "ko")
 ROWS = {

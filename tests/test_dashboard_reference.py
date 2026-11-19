@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Isolated checks for the 0.9 workbench (任务书第 4 节 + 参考图).
 
 版式关键点：Hero（诗签/圆环/大标题/三开关/页眉图）→ 化解波动条 →

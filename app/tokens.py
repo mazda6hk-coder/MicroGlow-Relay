@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Derived semantic colour tokens for the MicroGlow Relay shell.
 
 Raw brand palettes live in :mod:`app.theme`.  This module derives the

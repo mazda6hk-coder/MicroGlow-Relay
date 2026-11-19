@@ -1,4 +1,6 @@
-"""MG-RELAY-UI-TYPO-001: typography roles and palette resolution."""
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
+"""typography roles and palette resolution."""
 from PySide6.QtWidgets import QLabel
 from PySide6.QtGui import QFont
 from app import theme

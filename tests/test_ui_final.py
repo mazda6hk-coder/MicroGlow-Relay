@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Final-design acceptance: canvas events, durable accounting and real payloads."""
 import csv
 import io
@@ -33,7 +35,7 @@ class FinalUiTests(unittest.TestCase):
         cls.app = QApplication.instance() or QApplication([])
 
     def setUp(self):
-        base = Path("R:/WorkBuddyTmp/UI-FINAL-IMPLEMENT"); base.mkdir(parents=True, exist_ok=True)
+        base = Path(tempfile.gettempdir())/"relay-ui-final"; base.mkdir(parents=True, exist_ok=True)
         self.temp = tempfile.TemporaryDirectory(prefix="test-", dir=base)
         self.directory = Path(self.temp.name)
         self.environment = patch.dict(os.environ, CODEX_HOME=str(self.directory / "codex"), CLAUDE_CONFIG_DIR=str(self.directory / "claude"))

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Package bootstrap.
 
 The reusable core lives in ``src`` as plain top-level modules.  When running

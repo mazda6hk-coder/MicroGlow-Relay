@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Bridge between the reusable core (``src``) and the Qt interface.
 
 Everything here runs on the GUI thread apart from the worker pool used for
@@ -650,7 +652,7 @@ class Bridge(QObject):
         return integration_conflicts(self.settings)
 
     def resync_codex_catalog(self) -> bool:
-        """MG-RELAY-05-UI-001：把当前模型目录重新写入 Codex 侧文件。
+        """把当前模型目录重新写入 Codex 侧文件。
 
         增删改模型配置时 bridge 已自动热更新；这里给用户一个显式入口，
         用于手工改过 models.json 或换Codex 版本后重新对齐。
@@ -796,7 +798,7 @@ class Bridge(QObject):
         return len(entries if entries is not None else self.trip_ledger_entries())
 
     def model_usage(self) -> dict:
-        """MG-RELAY-05-UI-001：按模型名的今日真实用量，供模型管理页展示。
+        """按模型名的今日真实用量，供模型管理页展示。
 
         走 range_summary 而非 today()：只有前者带models 分组，
         且与日志页统计同源（持久化日索引），不会因重启而清零。

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """SETUP 页（任务书第 8 节 + 参考图）：接入、外观、服务、隐私、版本与数据。
 
 版式不变量：四张皮肤卡独占选中并标「使用中」；数据位置只读；

@@ -1,4 +1,6 @@
-"""多渠道路由专项：加权选择、冷却、故障切换（MG-RELAY-CHANNELS-001）。
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
+"""多渠道路由专项：加权选择、冷却、故障切换。
 
 网关侧的端到端切换走 MockSupplier 双实例；选择器的加权随机用统计断言。
 """

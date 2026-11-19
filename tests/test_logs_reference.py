@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Source-only logs layout checks with synthetic data and no external traffic."""
 from datetime import date
 from unittest.mock import patch

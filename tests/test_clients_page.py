@@ -1,4 +1,6 @@
-"""客户端接入页（MG-RELAY-CLAUDE-ACCESS-001）专项 UI 测试。
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
+"""客户端接入页专项 UI 测试。
 
 钉住新设计的不变量：
 * 导航里有「接入」页，Codex 与 Claude Code 两张卡并列；

@@ -1,8 +1,150 @@
 # MicroGlow Relay
 
-MicroGlow Relay 是一个面向 Windows 的本地 AI Model Router。桌面端使用 PySide6，核心网关使用 Python 标准库 HTTP 服务，并通过适配器连接 OpenAI Responses、OpenAI Chat Completions 与 Anthropic Messages 兼容上游。本地接口同时接受 OpenAI Responses 与 Anthropic Messages 两种入站协议——Codex 与 Claude Code 可以同时接入，各自独立选择「指定模型配置」或「跟随 Relay 选择」。
+**Use third-party models in Codex and Claude Code.**
 
-## 从源码运行
+A local AI model gateway for Windows. Relay listens on `127.0.0.1:4141` and lets
+Codex (OpenAI Responses) and Claude Code (Anthropic Messages) reach third-party
+model providers through one local endpoint — protocol-faithful, with retries and
+channel failover handled quietly.
+
+[![Platform](https://img.shields.io/badge/platform-Windows%20x64-4a5a68?style=flat-square)](#platform-and-requirements)
+[![License](https://img.shields.io/badge/license-Apache--2.0-4a5a68?style=flat-square)](LICENSE)
+[![Languages](https://img.shields.io/badge/interface-8%20languages-4a5a68?style=flat-square)](#interface)
+[![Version](https://img.shields.io/badge/version-1.0-4a5a68?style=flat-square)](CHANGELOG.md)
+
+<img src="docs/images/social-preview-1280x640.png" alt="MicroGlow Relay — use third-party models in Codex and Claude Code" width="100%">
+
+## Why Relay
+
+**Integration that stays out of the way.** One switch writes the Codex and
+Claude Code configuration for you, keeps a backup, detects changes made outside
+Relay, and restores the client when you exit. You do not edit
+`~/.codex/config.toml` or `~/.claude/settings.json` by hand.
+
+**Hiccups absorbed.** Each channel is retried before the response starts (up to
+two attempts; three for HTTP 500). When a channel fails, it is cooled down for
+60 seconds and Relay can switch to another channel — weighted at random — as
+long as nothing has been sent to the client yet. A stream that has already
+started is never replayed.
+
+**Trip Token.** Two independent subtotals, like the trip meters in a car. Each
+is scoped to All / Codex / Claude, can be named, can be reset with a 10-second
+undo, and is written to a trip ledger when reset. The total odometer never
+resets.
+
+## Quick start
+
+1. **Install and start Relay.** The Windows installer installs to
+   `C:\Program Files\MicroGlow Relay` and requires administrator rights. The
+   portable build can be run from any folder.
+2. **Add a provider and models.** Open **Models**, enter the provider's base URL
+   and API key, then add one or more model names. First install has no preset
+   models.
+3. **Turn on the client integration.** In **Clients / Setup**, enable Codex
+   and/or Claude Code, then restart the client. Relay writes the configuration
+   and the client starts using `http://127.0.0.1:4141`.
+
+Quit Relay from the tray menu (not by closing the window) so the client
+configuration is restored on exit.
+
+## How it works
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/how-it-works-dark.png">
+  <img alt="Codex and Claude Code connect to the local Relay gateway, which translates protocols and forwards to cloud providers, official APIs, or local models" src="docs/images/how-it-works-light.png">
+</picture>
+
+**Inbound protocols**
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /v1/responses` | OpenAI Responses (used by Codex) |
+| `POST /v1/messages` | Anthropic Messages (used by Claude Code) |
+| `POST /v1/messages/count_tokens` | Local token estimate, no upstream call |
+| `GET /v1/models` | Configured models |
+| `GET /health` | Liveness and version, no token required |
+
+**Upstream protocols:** OpenAI Chat Completions, OpenAI Responses, and
+Anthropic Messages. Providers such as DeepSeek, Zhipu, Moonshot, SiliconFlow,
+Ollama, OpenAI, Anthropic, and custom relays can be configured.
+
+**Faithful where it matters:** streaming, tool calls (including parallel tool
+calls), reasoning/thinking blocks, image input, and prompt-caching fields are
+passed through or translated per upstream. Token counting for
+`count_tokens` is a local estimate (`JSON characters / 4`), not the provider's
+count.
+
+## Trip Token
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/trip-token-dark.png">
+  <img alt="Trip Token A and B subtotals with All, Codex and Claude scopes, plus a total odometer" src="docs/images/trip-token-light.png">
+</picture>
+
+- **A and B** are two independent subtotals. Each keeps its own scope
+  (All / Codex / Claude); switching the scope changes the view, not the data.
+- Timing starts at the first request after a reset, not at the moment you press
+  reset. With no requests yet, the display reads "not started".
+- **Reset** clears only that subtotal and can be undone for 10 seconds. If the
+  subtotal was non-zero, the reset is written to the trip ledger with its name,
+  scope, start/end time, tokens, request count and per-model breakdown.
+- **The total odometer never resets.** It is the all-time aggregate and is not
+  affected by resetting A or B.
+
+All numbers in the screenshots are demo data.
+
+## Privacy and security
+
+- **No account.** Relay runs locally; settings and usage data stay on this
+  machine.
+- **Credentials.** In Relay's own settings, API keys and the local access token
+  are encrypted with Windows DPAPI. To make Codex and Claude Code connect, the
+  local access token is written in plain text into those clients' configuration
+  files — their formats require a literal token.
+- **Request and response bodies are not stored.** The local usage log keeps
+  metadata: timestamp, provider, model, status, elapsed time, input/output and
+  cached token counts, channel index, and a redacted upstream error excerpt
+  (truncated to 800 characters).
+- **Reasoning text is cached locally** for up to 7 days (maximum 2000 entries)
+  so that multi-turn continuation keeps working. This cache contains reasoning
+  text, not the rest of the conversation.
+- **Local access.** The gateway binds to `127.0.0.1` only, requires
+  `Authorization: Bearer <token>` on every endpoint except `/health`, and rejects
+  requests that carry an `Origin` header.
+- **Anonymous statistics are opt-in and off by default.** If you opt in, Relay
+  uploads one aggregate batch per day on normal exit. Batches contain counts and
+  token totals per provider/model — no prompt, response, endpoint URL, file or
+  key. The client does not send an IP field or a country code. A network
+  connection necessarily exposes the source address to the receiver; the
+  telemetry server uses it transiently to infer a country and does not store the
+  raw IP as a statistics field.
+- **Update checks are on by default.** Relay checks shortly after start and then
+  at most once per local day, against the GitHub release API with a fallback to
+  the project website. Update requests carry no installation ID, model
+  configuration, credentials, conversation content or usage statistics. A new
+  version is downloaded and checksum-verified automatically; installation
+  always requires your action. Update checks are independent of the statistics
+  consent.
+- **The installer is not code-signed.** Windows SmartScreen may warn. Compare
+  the SHA-256 published with each release.
+
+Full texts: [Privacy policy](docs/PRIVACY-POLICY.md),
+[User agreement](docs/USER-AGREEMENT.md).
+
+## Platform and requirements
+
+- **Windows x64.** The installer is 64-bit and requires administrator rights;
+  it installs under `C:\Program Files\MicroGlow Relay`. The application uses
+  Qt 6.11, which requires Windows 10 or later.
+- **8 interface languages:** 简体中文, 繁體中文, English, Deutsch, 日本語, ไทย,
+  Español, 한국어. The installer itself is English/Simplified Chinese only.
+- **8 skins:** spring / summer / autumn / winter, each with a day and a night
+  palette. Default is spring, day.
+- **Linux is not supported in this release.**
+
+## Build from source
+
+Requirements: Windows, Python 3.11 or later.
 
 ```powershell
 python -m venv work\venv
@@ -10,42 +152,74 @@ work\venv\Scripts\python.exe -m pip install -r requirements.txt -r requirements-
 work\venv\Scripts\python.exe runapp.py
 ```
 
-仅验证启动：
+Smoke test, unit tests, then packaging:
 
 ```powershell
 work\venv\Scripts\python.exe runapp.py --smoke-test --data-dir work\smoke-data
-```
-
-## 测试与构建
-
-```powershell
 work\venv\Scripts\python.exe -m unittest discover -s tests -v
 .\build-app.ps1
 ```
 
-当前版本见 `src/storage.py` 的 `VERSION`（唯一版本源），桌面程序文件名随版本号为 `MicroGlow-Relay-<VERSION>.exe`。
+`build-app.ps1` builds a PyInstaller onefile executable named after
+`VERSION` in `src/storage.py` (the single version source). The installer script
+`build-installer.ps1` requires Inno Setup 6.
 
-## 安装与更新（发布准备）
+Note: the core gateway, routing, trip and update tests run headless. UI tests
+instantiate Qt and need a desktop session; in a headless environment the suite
+may terminate inside Qt.
 
-安装包配方在 `installer/MicroGlowRelay.iss`。正式发布时，先构建当前版本 EXE，再安装 Inno Setup 6 并运行 `./build-installer.ps1`。安装包按用户安装到 `%LOCALAPPDATA%\Programs\MicroGlow Relay`，升级使用同一个 AppId 与程序路径；卸载不会删除用户数据。当前尚未构建或验证安装包。
+## FAQ
 
-安装版的数据固定在 `%LOCALAPPDATA%\MicroGlow Relay\data`，不再跟随 EXE 所在目录。源码运行仍使用项目内 `data`，`--data-dir` 仍可显式指定位置。若直接用新 EXE 替换同一便携目录中的旧 EXE，首次启动会将旧 `data` 复制到用户目录，保留旧目录且不覆盖已有新数据。若从任意便携目录改用安装包，安装器无法得知旧目录位置：退出 Relay，确认目标数据目录尚不存在后，将旧 EXE 同级的 `data` 复制到上述用户目录，再启动安装版；若目标目录已存在，不要合并或覆盖，应先核对两处数据。旧目录中的 Codex 接入路径可能仍指向旧模型目录，确认新数据与接入正常前不要删除旧目录。
+**Does Relay provide models or an API key?**
+No. You bring your own provider account or local model.
 
-设置页有手动“检查更新”：仅在点击时读取 `mazda6hk-coder/MicroGlow-Relay` 的最新正式 GitHub Release；发现新版后由用户决定是否打开下载页，不在程序内自动下载或安装。该公开发布仓库已建立，但尚未发布 Release，此时按钮提示“暂无可用的正式更新”，不误报为“已是最新版本”。仓库地址已硬编码在 `app/updates.py`。每款 MicroGlow 软件独立使用自己的发布仓库与更新接口。自动检查、后台下载及官网备用源属于后续工作，本轮未实现。上架前仍需发布与安装包版本一致的正式 Release，并对安装、升级、卸载保留数据及旧数据迁移做实机验收。
+**Do I need an account or a subscription?**
+Relay has no account of its own. It connects to the endpoints you configure; your
+use of those providers remains subject to their terms.
 
-匿名遥测仅在用户明确同意后使用 `https://metrics.microglow.com.cn/v1/telemetry/batches` 上传 UTC 每日汇总；国家只由服务端推断，客户端不发送 `country_code`。
+**Why is there no model on first launch?**
+There are no presets. Add at least one provider and model on the Models page.
 
-## 数据与隐私
+**Requests fail — what do I check?**
+Base URL, API key, balance, and the exact model name. For Claude Code-style
+entry points, the base URL must be the host root, without `/v1`.
 
-- 本地服务默认仅监听 `127.0.0.1:4141`。
-- API Key 与本地访问令牌使用 Windows DPAPI 加密。
-- 请求正文不会写入磁盘；活动记录只保留状态、耗时和 Token 统计。
-- 默认主题为 MicroGlow 官网色，设置页可切换 MicroGlow、黑色、白色、赛博朋克、金碧辉煌和 iOS 风格六套主题。
+**Where is my data?**
+The installed build uses `%LOCALAPPDATA%\MicroGlow Relay\data`. Running from
+source uses `data` in the project folder; `--data-dir` overrides it.
 
-## 本阶段说明
+**Why does Windows warn about the installer?**
+It is not code-signed yet. Verify the published checksum.
 
-“会话兼容”可对所选会话在 Codex 官方订阅与 Relay 之间切换模型接入配置，自动核对、备份和校验；不会读取或改写历史正文。切换到 Codex 时，以最近一条其它官方会话的模型标识为参考；找不到可靠参考时不写入。工作台有电源式总开关（控制 Codex 接入与本地服务启停），Claude Code 的开关在「客户端接入」页。
+**Is Linux supported?**
+Not in this release.
 
-「客户端接入」页并列管理 Codex 与 Claude Code：Codex 接入改动 `~/.codex/config.toml`（TOML），Claude Code 接入改动 `~/.claude/settings.json`（写入 `env.ANTHROPIC_BASE_URL` / `ANTHROPIC_AUTH_TOKEN`，并把默认模型设为默认入口）。两者都可逆、有备份、退出时自动还原；Claude Code 的接入在重启会话后生效。Token 小计（A/B 两段）的计时从清零后第一笔调用起算，清零后无调用显示“尚未开始计时”。详见 `docs/reports/MG-RELAY-CLAUDE-ACCESS-001.md` 与 `MG-RELAY-TRIPTOKEN-002.md`。
+## Roadmap
 
-上游在尚未向本地客户端发送响应时返回 429、502–504、520–524，Relay 在总预响应预算内最多重试一次；已经开始的流绝不重放。重试可能造成第二次上游计算或计费，详见 `docs/reports/MG_RELAY_524_RETRY_REPORT.md`。
+Planned, not released. Listed here so that nobody mistakes a plan for a feature:
+
+- Cross-model session continuation.
+- Linux regression testing and a Linux release, if it passes.
+- Code signing for the installer.
+- A packaging review for LGPL obligations (see `THIRD_PARTY_NOTICES.md`).
+
+## License, trademarks and artwork
+
+- Source code: **Apache License 2.0** — [LICENSE](LICENSE), [NOTICE](NOTICE).
+- Seasonal illustrations, skin artwork, icons and marketing images:
+  **CC BY-NC-ND 4.0**, separately from the code — [ARTWORK-LICENSE.md](ARTWORK-LICENSE.md).
+- Names and logos are not licensed — [TRADEMARKS.md](TRADEMARKS.md).
+- Third-party components: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+MicroGlow Relay is independent and is not affiliated with, endorsed by, or
+sponsored by OpenAI or Anthropic. "Codex" and "Claude Code" are used only to
+describe client compatibility; no official logos are used.
+
+## Contact
+
+- Support: <support@microglow.com.cn>
+- Privacy: <privacy@microglow.com.cn>
+- Security: <security@microglow.com.cn> (see [SECURITY.md](SECURITY.md))
+- Website: <https://www.microglow.com.cn/relay>
+
+[简体中文说明](README.zh-CN.md)

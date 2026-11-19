@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Desktop UI localization. Catalogs are bundled; translation is offline at runtime."""
 from __future__ import annotations
 

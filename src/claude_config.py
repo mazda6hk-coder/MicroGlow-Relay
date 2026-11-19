@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Reversible Claude Code integration for MicroGlow Relay.
 
 与 codex_config.py 同构：把 Claude Code 的 `~/.claude/settings.json` 指向本机 Relay，

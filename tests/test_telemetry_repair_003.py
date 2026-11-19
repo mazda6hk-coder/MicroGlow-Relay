@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Production Pascal writer output -> settings state -> normal exit upload gate."""
 from pathlib import Path
 import shutil

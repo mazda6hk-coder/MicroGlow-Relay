@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Multi-channel routing with weighted selection and cooldowns.
 
 一个逻辑模型配置（profile）可以挂多个上游渠道（base_url + key 组合）。

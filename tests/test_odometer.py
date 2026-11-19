@@ -1,4 +1,6 @@
-"""MG-RELAY-ODOMETER-001: 翻牌里程表组件。
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
+"""翻牌里程表组件。
 
 任务书第 5 节 + 第 12 节验收：0、个位数、10 位、12 位、溢出五种显示
 均正确；未用高位 32% 淡显；数字变化触发滚动动画；等宽字体。

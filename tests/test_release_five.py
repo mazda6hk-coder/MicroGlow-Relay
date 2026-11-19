@@ -1,4 +1,6 @@
-"""Isolated acceptance for MG-RELAY-SESSION-LABEL-001."""
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
+"""Isolated acceptance for ."""
 from unittest.mock import patch, PropertyMock
 from test_ui3 import UiTestCase
 from server import Gateway

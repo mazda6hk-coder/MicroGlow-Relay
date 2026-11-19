@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """共享友好模型名：Codex 模型目录与 Claude /model 用同一套人类可读的 slug。
 
 背景：配置 id（``model-<12位hex>``）是存储层的稳定标识，但让用户在 Claude Code

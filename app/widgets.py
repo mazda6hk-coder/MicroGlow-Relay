@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Reusable presentation widgets for the MicroGlow Relay shell."""
 from __future__ import annotations
 

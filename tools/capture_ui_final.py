@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Reproducible final-design captures using only isolated, synthetic local data.
 
 No real client configuration, upstream request or telemetry upload is used.
@@ -114,7 +116,7 @@ def main():
     parser.add_argument("--size", default="2010x1350"); parser.add_argument("--themes", default="winter-day,winter-night,spring-day")
     parser.add_argument("--interactions", action="store_true")
     args = parser.parse_args(); args.output.mkdir(parents=True, exist_ok=True)
-    temp_root = Path("R:/WorkBuddyTmp/UI-FINAL-IMPLEMENT"); temp_root.mkdir(parents=True, exist_ok=True)
+    temp_root = Path(tempfile.gettempdir())/"relay-ui-final"; temp_root.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="capture-", dir=temp_root) as temporary:
         directory = Path(temporary); os.environ["CODEX_HOME"] = str(directory / "codex"); os.environ["CLAUDE_CONFIG_DIR"] = str(directory / "claude")
         from PySide6.QtCore import QCoreApplication, QEvent

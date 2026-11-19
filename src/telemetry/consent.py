@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Explicit opt-in consent and anonymous installation identity."""
 from __future__ import annotations
 

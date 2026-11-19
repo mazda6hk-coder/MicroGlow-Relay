@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """渠道 CRUD 与健康状态读取（任务书第 11.2 节、第 6 节渠道编辑器后端）。"""
 from __future__ import annotations
 

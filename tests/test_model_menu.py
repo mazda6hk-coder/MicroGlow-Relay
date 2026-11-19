@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Model actions must be opaque, correctly placed and usable in the scene."""
 from pathlib import Path
 import sys,unittest

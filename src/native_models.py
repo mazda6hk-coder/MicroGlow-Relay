@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Codex 原生模型目录快照，以及原生 slug 的透传路由解析。
 
 ## 为什么需要这个文件

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Native tooltip pixels and useful hover content across every product page."""
 from pathlib import Path
 import sys

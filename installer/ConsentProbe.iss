@@ -1,3 +1,5 @@
+; Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+; SPDX-License-Identifier: Apache-2.0
 ; Isolated persistence probe for TelemetryConsent.iss. Never shipped.
 ; Build with ISCC, run with /VERYSILENT plus:
 ;   /CONSENTPATH=<dir>\telemetry-consent.json /ALLOW=true|false

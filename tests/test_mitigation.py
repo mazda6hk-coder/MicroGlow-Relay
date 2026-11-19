@@ -1,4 +1,6 @@
-"""化解波动统计与错误三分类专项（MG-RELAY-MITIGATION-001）。
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
+"""化解波动统计与错误三分类专项。
 
 口径（2026-11-10 与刘总对齐）：
 - 按请求计：一次请求被重试/换渠道救活 = 化解 1 次；

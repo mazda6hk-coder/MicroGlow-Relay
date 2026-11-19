@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Scoped UI and loopback-only request result checks; no paid API or upload."""
 import json
 import threading

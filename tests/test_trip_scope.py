@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Trip 读数口径三档（全局|Codex|Claude）——账按协议分桶并行累计。
 
 对着这几个容易静默出错的地方写：

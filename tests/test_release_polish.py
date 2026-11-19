@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Isolated release-polish checks; no real Codex configuration or network calls."""
 import ast
 from pathlib import Path
@@ -75,7 +77,7 @@ class ReleasePolishTests(UiTestCase):
         self.assertIsNone(untouched.graphicsEffect())
 
     def test_mock_failure_records_sanitized_upstream_detail(self):
-        """MG-RELAY-REASONING-SHAPE-001 D：错误分类保持，同时留下脱敏后的上游正文。
+        """ D：错误分类保持，同时留下脱敏后的上游正文。
 
         旧契约是上游 message 一律不落盘，导致 400 类问题无法复盘；本任务改为记录
         脱敏后的上游 message。密钥与请求正文仍不得写入。

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Claude 客户端入站（Anthropic Messages → Relay）专项测试。
 
 钉住三件事：

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Content pages of the MicroGlow Relay shell."""
 from __future__ import annotations
 import time
@@ -3792,7 +3794,7 @@ class SettingsPage(Page):
             panels["claude"], str(claude.get("model") or "") == ROUTER_MODEL)
 
     def _refresh_codex_access(self) -> None:
-        """MG-RELAY-05-UI-001：设置页展示 Codex 当前真实指向，并按状态启用操作。"""
+        """设置页展示 Codex 当前真实指向，并按状态启用操作。"""
         state = self.bridge.status()
         view = self.bridge.codex_target()
         pointing = bool(view.get("points_to_router"))

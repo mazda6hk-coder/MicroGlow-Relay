@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """把 Relay 已写入的 Codex 供应商表纠正为 ``requires_openai_auth = true``。
 
 用途

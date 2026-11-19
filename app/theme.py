@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Centralised colour tokens and stylesheet for the MicroGlow Relay shell.
 
 0.9 令牌体系：4 皮肤（春玉兰/夏荷/秋枫/冬梅）× 昼夜 = 8 组合。

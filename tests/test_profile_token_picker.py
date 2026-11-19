@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """添加/修改模型对话框：模型列表只在手动点击时读取，Token 只给固定档位。
 
 背景：之前粘贴地址 + KEY 后 800ms 防抖自动拉取供应商模型列表，

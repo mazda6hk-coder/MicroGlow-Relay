@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """退出上传预算：积压批次不得传到一半被进程退出掐断（MG-TELEMETRY-EXIT-FLUSH-001）。"""
 from __future__ import annotations
 

@@ -1,7 +1,9 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Privacy-preserving telemetry for MicroGlow Relay.
 
-Local consent, UTC daily aggregation, durable batches (MG-RELAY-003-A) plus the
-production HTTP transport introduced by MG-RELAY-003-B.  Recording is always
+Local consent, UTC daily aggregation, durable batches  plus the
+production HTTP transport introduced by .  Recording is always
 non-blocking, and every failure stays silent and retryable.
 """
 

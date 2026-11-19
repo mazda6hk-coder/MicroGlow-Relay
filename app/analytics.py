@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Theme-aware local data charts. No chart dependencies or network access."""
 from PySide6.QtCore import QPointF, QRectF, Qt, QSize
 from PySide6.QtGui import QColor, QPainter, QPen

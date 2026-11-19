@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Update source failover, integrity checks, and user-only execution boundary."""
 import hashlib
 import io

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """0.9 版式的装饰层：微光圆环、皮肤页眉图、四季飘落物、迷你柱状图。
 
 装饰使用内置图片与令牌绘制，无须远程下载。四季昼夜使用配套透明插画，

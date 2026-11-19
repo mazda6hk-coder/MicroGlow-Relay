@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """孤儿工具结果清洗：Codex 私有簿记不再击穿严格上游。
 
 背景：Codex 会把内部簿记（send_message_to_thread 派工回执、

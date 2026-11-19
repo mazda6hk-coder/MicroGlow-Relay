@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Token 小计（TRIP A / B）——与既有统计口径同源的分段计数器。
 
 这一组用例对着验收标准写，重点不在"数字对不对"，而在四个容易静默出错的地方：

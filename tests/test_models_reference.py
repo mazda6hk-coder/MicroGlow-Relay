@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Isolated reference-table tests; no real keys, upstream calls or user data."""
 from datetime import date
 from pathlib import Path
@@ -66,7 +68,7 @@ class ModelsReferenceTests(UiTestCase):
                 patch.object(page, "set_default") as default:
             page.add_button.click()
             page.row_controls[profiles[1]["id"]]["edit"].click()
-            # MG-RELAY-05-UI-001：非默认行的菜单第一项是「设为默认模型」，
+            # 非默认行的菜单第一项是「设为默认模型」，
             # 删除退到第二项——测试必须点对，否则会把「设默认」当成「删除」。
             menu = page.row_controls[profiles[1]["id"]]["menu"]
             self.assertEqual(menu.actions()[0].text(), tr("设为默认模型"))
@@ -112,7 +114,7 @@ class ModelsReferenceTests(UiTestCase):
         self.assertEqual(len(names), 3)
         for name in names:
             self.assertEqual(name.text(), name.full_text())
-        # MG-RELAY-05-UI-001：「使用情况」接真实统计，没有记录时明说未使用，
+        # 「使用情况」接真实统计，没有记录时明说未使用，
         # 不再显示悬空的破折号（旧断言固化的是 6.0 的假数据口径）。
         self.assertEqual({page.table.item(row, 2).text() for row in range(page.table.rowCount())},
                          {tr("今日未使用")})
@@ -147,7 +149,7 @@ class ModelsReferenceTests(UiTestCase):
         self.assertGreaterEqual(page.search.width(), 220)
 
     def test_operations_column_fits_both_buttons_in_every_language(self):
-        """MG-RELAY-05-UI-001：「设为默认」曾被省略号吃掉，按钮宽度必须实测。
+        """「设为默认」曾被省略号吃掉，按钮宽度必须实测。
 
         列宽是按百分比算的，德文/西班牙文里的「设为默认」比中文长得多，
         写死像素一定会在某个语种破功——所以这里逐语种断言不出现省略号。

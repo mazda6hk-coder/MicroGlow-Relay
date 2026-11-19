@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Claude Code 接入（settings.json 注入/还原）专项测试。
 
 与 Codex 接入同一套验收语义：可逆、有备份、漂移可检测、冲突不覆盖。

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """版式度量：垂直节奏、间距与组件尺寸的唯一来源。
 
 任务书 v0.9 第 2 节只钉死了字号与圆角，间距明确留给实现决定。这里把它定成

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """缓存命中 / 推理 token 的采集口径、落盘字段与统计分母。
 
 背景（2026-10-13）：上游一直在 usage 里返回 input_tokens_details.cached_tokens，

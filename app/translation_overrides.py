@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Reviewed UI terminology that machine translation tends to misinterpret.
 
 Order: Traditional Chinese, English, German, Japanese, Thai, Spanish, Korean.
@@ -264,7 +266,7 @@ _ROWS.update({
     "已转换 {0} 条历史推理记录。": ("已轉換 {0} 條歷史推理記錄。", "Converted {0} reasoning records in the history.", "{0} Reasoning-Einträge im Verlauf umgewandelt.", "履歴内の推論レコード {0} 件を変換しました。", "แปลงระเบียนการให้เหตุผลในประวัติแล้ว {0} รายการ", "Se convirtieron {0} registros de razonamiento del historial.", "기록의 추론 레코드 {0}개를 변환했습니다."),
 })
 
-# MG-RELAY-05-UI-001：0.5 路由语义（会话内独立选择 + 默认模型兜底）与会话接续退役后的新界面文案。
+# 0.5 路由语义（会话内独立选择 + 默认模型兜底）与会话接续退役后的新界面文案。
 _ROWS.update({
     "本地网关": ("本地閘道", "Local gateway", "Lokales Gateway", "ローカルゲートウェイ", "เกตเวย์ในเครื่อง", "Pasarela local", "로컬 게이트웨이"),
     "模型接入方式": ("模型接入方式", "How models are reached", "Modellzugriff", "モデルへの接続方式", "วิธีเข้าถึงโมเดล", "Acceso a modelos", "모델 연결 방식"),
@@ -415,7 +417,7 @@ _ROWS.update({
         "설정이 외부에서 변경되어 연결 상태를 확인해야 합니다"),
 })
 
-# ---- MG-RELAY-CLAUDE-ACCESS-001：Claude Code 接入 + 客户端接入页
+# ---- Claude Code 接入 + 客户端接入页
 _ROWS.update({
     "接入": ("接入", "Connect", "Verbinden", "接続", "เชื่อมต่อ", "Conectar", "연결"),
     "客户端接入": ("用戶端接入", "Client access", "Client-Verbindungen", "クライアント接続",
@@ -528,7 +530,7 @@ _ROWS.update({
         "두 경로는 동시에 사용할 수 있으며 택일이 아닙니다. 연결 후 Codex와 Claude Code는 기본적으로 \"Relay 선택 따르기\"를 사용하고, 세션에서 /model로 특정 설정으로 바꿀 수 있습니다."),
 })
 
-# ---- MG-RELAY-SPRING-MAGNOLIA-001：春玉兰版式（侧栏 + 工作台重排）
+# ---- 春玉兰版式（侧栏 + 工作台重排）
 _ROWS.update({
     "春玉兰": ("春玉蘭", "Spring Magnolia", "Frühlingsmagnolie", "春の玉兰",
              "แมกโนเลียฤดูใบไม้ผลิ", "Magnolia primaveral", "봄 목련"),

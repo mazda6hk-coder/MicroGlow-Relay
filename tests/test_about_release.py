@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Release documents are offline, accessible and contain no test credentials."""
 from pathlib import Path
 from unittest.mock import patch

@@ -1,4 +1,6 @@
-"""MG-RELAY-003-B：生产入口硬编码、HTTP 传输与运行时接线（全离线）。"""
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
+"""生产入口硬编码、HTTP 传输与运行时接线（全离线）。"""
 from __future__ import annotations
 
 from datetime import datetime, timezone

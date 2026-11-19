@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """End-to-end check of the packaged executable.
 
 Starts a local mock supplier, points a temporary profile at it, integrates the

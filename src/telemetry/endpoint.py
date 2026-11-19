@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """生产遥测服务地址（唯一硬编码位置）。
 
 协议实现见 ``transport.py``：POST ``/v1/telemetry/batches``。

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Native Codex return and bounded Relay backup retention; synthetic files only."""
 import sys
 from pathlib import Path

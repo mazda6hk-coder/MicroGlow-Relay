@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Local-only classification of the actual upstream URL; no host is uploaded."""
 from __future__ import annotations
 

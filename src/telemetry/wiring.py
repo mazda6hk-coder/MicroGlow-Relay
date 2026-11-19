@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """把 Relay 的内部取值映射成遥测允许的固定维度（纯函数，无 I/O）。"""
 from __future__ import annotations
 

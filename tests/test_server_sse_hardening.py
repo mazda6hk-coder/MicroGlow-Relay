@@ -1,4 +1,6 @@
-"""MG-RELAY-STRESS-HARDEN-003 regressions.
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
+""" regressions.
 
 Covers three defects reproduced against the shipped build with an in-process
 gateway plus a programmable fake upstream:

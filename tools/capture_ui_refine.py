@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """Eight-language review and optional native UI with isolated synthetic data."""
 from pathlib import Path
 import argparse
@@ -24,7 +26,7 @@ def main():
     from capture_ui_final import build_fixture
     app = QApplication([])
     theme.apply_palette('winter-day'); app.setStyleSheet(theme.stylesheet())
-    base = Path('R:/WorkBuddyTmp/UI-REFINE-002'); base.mkdir(parents=True, exist_ok=True)
+    base = Path(tempfile.gettempdir())/'relay-captures'; base.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='capture-', dir=base) as temporary:
         directory = Path(temporary)
         os.environ['CODEX_HOME'] = str(directory / 'codex')
@@ -35,11 +37,11 @@ def main():
             gateway.start(0)
             shell = Shell(bridge); shell.resize(1340,900); shell.show()
             if args.native:
-                shell.setWindowTitle('MicroGlow Relay · UI-REFINE-002')
+                shell.setWindowTitle('MicroGlow Relay · ')
                 shell.apply_language(args.language)
                 app.exec()
             else:
-                output = ROOT / 'docs/UI-REFINE-002/screenshots'; output.mkdir(parents=True,exist_ok=True)
+                output = ROOT / 'docs//screenshots'; output.mkdir(parents=True,exist_ok=True)
                 written, clipping, clipped_buttons = [], [], []
                 for code, _ in LANGUAGE_CHOICES:
                     shell.apply_language(code)

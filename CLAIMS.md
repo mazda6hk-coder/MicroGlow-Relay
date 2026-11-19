@@ -118,6 +118,7 @@ symbol names next to them are the stable anchors.
 | R70 | The in-app privacy note now says: DPAPI encryption, bodies not stored, reasoning cached briefly | `app/final_views.py:908`; `app/final_translations.py:35` (all eight locales) | Verified |
 | R71 | Screenshots are real application renders with synthetic data | `tools/capture_ui_final.py:23` (`build_fixture` uses `fixture.invalid`, `synthetic-not-real-…`, no upstream calls); assets in `docs/images/screenshots/` | Verified (tool + provenance) |
 | R72 | The GIF and the 30-second video are rendered frame-by-frame from the real application, not mockups | `tools/capture_ui_final.py` (fixture + `Shell.grab()`); `capture_gif.py` / `capture_video.py` in the release kit; no simulated screens | Verified (method) |
+| R73 | The privacy policy discloses the local reasoning-text cache (7 days / 2000 entries, never uploaded) | `docs/PRIVACY-POLICY.md` (软件运行与本地数据); `src/records.py:806`, `:815-825`; `src/telemetry/store.py` (aggregates only) | Verified |
 
 ## CHANGELOG
 

@@ -115,9 +115,10 @@ All numbers in the screenshots are demo data.
   metadata: timestamp, provider, model, status, elapsed time, input/output and
   cached token counts, channel index, and a redacted upstream error excerpt
   (truncated to 800 characters).
-- **Reasoning text is cached locally** for up to 7 days (maximum 2000 entries)
-  so that multi-turn continuation keeps working. This cache contains reasoning
-  text, not the rest of the conversation.
+- **Reasoning text is cached locally** to support multi-turn continuation of
+  tool-call turns: the reasoning text returned by the upstream is kept for up to 7
+  days (maximum 2000 entries). This cache stays on this machine and is never
+  included in anonymous statistics.
 - **Local access.** The gateway binds to `127.0.0.1` only, requires
   `Authorization: Bearer <token>` on every endpoint except `/health`, and rejects
   requests that carry an `Origin` header.

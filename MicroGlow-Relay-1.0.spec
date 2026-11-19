@@ -44,6 +44,7 @@ a = Analysis(
              for key in ("springmagnolia", "mistblue", "graphite", "microglow", "nightfall",
                          "goldglow", "moonwhite", "starpark")],
            (str(ROOT / "docs" / "USER-GUIDE.md"), "docs"),
+           (str(ROOT / "docs" / "help"), "docs/help"),
            (str(ROOT / "docs" / "USER-AGREEMENT.md"), "docs"),
            (str(ROOT / "docs" / "PRIVACY-POLICY.md"), "docs"),
            (str(ROOT / "docs" / "THIRD-PARTY-NOTICES.md"), "docs"),

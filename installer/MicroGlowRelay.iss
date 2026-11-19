@@ -43,6 +43,7 @@ Source: "{#SourceExe}"; DestDir: "{app}"; DestName: "MicroGlowRelay.exe"; Flags:
 Source: "..\docs\USER-AGREEMENT.md"; DestDir: "{app}\docs"; Flags: ignoreversion
 Source: "..\docs\PRIVACY-POLICY.md"; DestDir: "{app}\docs"; Flags: ignoreversion
 Source: "..\docs\USER-GUIDE.md"; DestDir: "{app}\docs"; Flags: ignoreversion
+Source: "..\docs\help\*"; DestDir: "{app}\docs\help"; Flags: ignoreversion
 Source: "..\docs\THIRD-PARTY-NOTICES.md"; DestDir: "{app}\docs"; Flags: ignoreversion
 Source: "..\docs\licenses\*"; DestDir: "{app}\docs\licenses"; Flags: ignoreversion recursesubdirs createallsubdirs
 

@@ -1,0 +1,49 @@
+# 运行时数据 —— 含 DPAPI 加密的 API KEY 与本地令牌，绝不入库
+data/
+work/
+
+# 构建产物
+*.exe
+build/
+dist/
+
+# 密钥与本机密文件
+.git-local-backup/
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.pfx
+*.p12
+secrets/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Node / 前端构建
+node_modules/
+.next/
+.turbo/
+*.tsbuildinfo
+
+# 数据库与日志
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# 备份目录
+backups/
+
+# 系统杂项
+.DS_Store
+Thumbs.db
+*.apk
+*.zip
+*.rar

@@ -1,0 +1,998 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>MicroGlow Relay 匿名遥测决策中心</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --surface: #0d1b2d;
+      --surface-2: #13243a;
+      --border: #203957;
+      --text: #edf6ff;
+      --muted: #8fa7bf;
+      --blue: #47a7ff;
+      --cyan: #4de3c1;
+      --violet: #a78bfa;
+      --orange: #ffb454;
+      --red: #ff6b7d;
+      --shadow: 0 18px 45px rgba(0, 0, 0, .24);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 86% -12%, rgba(71, 167, 255, .14), transparent 32rem),
+        radial-gradient(circle at -8% 44%, rgba(77, 227, 193, .08), transparent 28rem),
+        var(--bg);
+      color: var(--text);
+      font: 14px/1.5 Inter, "Segoe UI", "Microsoft YaHei", sans-serif;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .shell { max-width: 1500px; margin: 0 auto; padding: 0 28px 48px; }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 18px 0;
+      border-bottom: 1px solid rgba(32, 57, 87, .75);
+      background: rgba(7, 17, 31, .88);
+      backdrop-filter: blur(18px);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo {
+      position: relative;
+      width: 48px;
+      height: 48px;
+      flex: 0 0 48px;
+      overflow: hidden;
+      border: 1px solid rgba(77, 227, 193, .35);
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 0 0 24px rgba(77, 227, 193, .12);
+    }
+    .logo img { position: absolute; top: -.35px; left: 50%; width: 64.25px; max-width: none; height: auto; transform: translateX(-50%); }
+    .brand-glow { color: #00bdd9; font-style: normal; }
+    .brand-copy { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+    .brand strong { display: block; font-size: 20px; letter-spacing: .1px; }
+    .brand span { display: block; color: var(--muted); font-size: 15px; font-weight: 600; }
+    .actions { display: flex; gap: 8px; }
+    .button {
+      min-height: 38px;
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--text);
+    }
+    .button:hover { border-color: var(--blue); }
+    .button.primary { border-color: transparent; background: var(--blue); color: #04111e; font-weight: 700; }
+    .hero { display: flex; justify-content: space-between; gap: 24px; padding: 38px 0 22px; }
+    .eyebrow { color: var(--cyan); font-size: 12px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; }
+    h1 { margin: 8px 0 6px; font-size: clamp(28px, 4vw, 42px); line-height: 1.15; letter-spacing: -.8px; }
+    .hero p { margin: 0; color: var(--muted); }
+    .filters { display: flex; align-items: end; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+    .filter-field { display: grid; gap: 5px; }
+    .filter-field label, .filter-label { color: var(--muted); font-size: 11px; }
+    .filter-field input { height: 36px; padding: 0 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); color-scheme: dark; }
+    .range-shortcuts { display: flex; gap: 5px; }
+    .range-button { min-width: 38px; height: 36px; min-height: 36px; padding: 0 10px; }
+    .range-button.active { border-color: var(--cyan); background: rgba(77, 227, 193, .14); color: var(--cyan); }
+    .status { align-self: flex-end; display: flex; align-items: center; gap: 8px; color: var(--muted); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
+    .kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+    .signal-grid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+    .signal { padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; background: rgba(13, 27, 45, .72); }
+    .signal span { display: block; color: var(--muted); font-size: 11px; }
+    .signal strong { display: block; margin-top: 5px; font-size: 19px; }
+    .positive { color: var(--cyan); }
+    .negative { color: var(--red); }
+    .card {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: linear-gradient(150deg, rgba(19, 36, 58, .94), rgba(10, 24, 41, .94));
+      box-shadow: var(--shadow);
+    }
+    .kpi { position: relative; min-height: 142px; padding: 20px; }
+    .kpi::after { content: ""; position: absolute; right: -20px; bottom: -34px; width: 95px; height: 95px; border-radius: 50%; background: var(--accent); opacity: .1; filter: blur(2px); }
+    .kpi-label { color: var(--muted); font-size: 13px; }
+    .kpi-value { margin-top: 12px; font-size: clamp(25px, 3vw, 34px); font-weight: 760; letter-spacing: -.8px; }
+    .kpi-note { margin-top: 6px; color: var(--muted); font-size: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 14px; margin-top: 14px; }
+    .span-8 { grid-column: span 8; }
+    .span-7 { grid-column: span 7; }
+    .span-6 { grid-column: span 6; }
+    .span-5 { grid-column: span 5; }
+    .span-4 { grid-column: span 4; }
+    .span-12 { grid-column: span 12; }
+    .panel { min-height: 355px; padding: 20px; }
+    .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+    .panel h2 { margin: 0; font-size: 16px; }
+    .panel-subtitle { margin-top: 3px; color: var(--muted); font-size: 12px; }
+    .tabs { display: flex; gap: 4px; padding: 3px; border: 1px solid var(--border); border-radius: 9px; background: rgba(7, 17, 31, .55); }
+    .tab { padding: 5px 10px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); }
+    .tab.active { background: var(--surface-2); color: var(--text); }
+    .chart { min-height: 260px; }
+    .chart svg { display: block; width: 100%; height: 260px; overflow: visible; }
+    .grid-line { stroke: rgba(143, 167, 191, .13); stroke-width: 1; }
+    .axis-label { fill: var(--muted); font-size: 11px; }
+    .trend-fill { fill: url(#trendGradient); }
+    .trend-line { fill: none; stroke: var(--blue); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .trend-point { fill: var(--bg); stroke: var(--cyan); stroke-width: 2; }
+    .bars { display: grid; gap: 16px; }
+    .bar-row { display: grid; gap: 7px; }
+    .bar-meta { display: flex; justify-content: space-between; gap: 16px; }
+    .bar-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bar-value { color: var(--muted); white-space: nowrap; }
+    .bar-track { height: 8px; overflow: hidden; border-radius: 99px; background: rgba(143, 167, 191, .12); }
+    .bar-fill { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--cyan)); transition: width .45s ease; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 11px 10px; border-bottom: 1px solid rgba(32, 57, 87, .72); text-align: left; white-space: nowrap; }
+    th { color: var(--muted); font-size: 12px; font-weight: 600; }
+    td.number, th.number { text-align: right; }
+    th.token-column, td.token-column { min-width: 240px; width: 240px; font-variant-numeric: tabular-nums; }
+    .success-ring { position: relative; display: grid; width: 170px; height: 170px; margin: 22px auto; place-items: center; border-radius: 50%; background: conic-gradient(var(--cyan) var(--progress), rgba(143, 167, 191, .13) 0); }
+    .success-ring::before { content: ""; position: absolute; inset: 15px; border-radius: inherit; background: var(--surface); }
+    .ring-label { position: relative; text-align: center; }
+    .ring-label strong { display: block; font-size: 30px; }
+    .ring-label span { color: var(--muted); font-size: 12px; }
+    .outcome-legend { display: flex; justify-content: center; gap: 22px; color: var(--muted); }
+    .legend-mark { display: inline-block; width: 8px; height: 8px; margin-right: 7px; border-radius: 50%; }
+    .empty { display: grid; min-height: 230px; place-items: center; color: var(--muted); text-align: center; }
+    .login {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(3, 10, 19, .83);
+      backdrop-filter: blur(14px);
+    }
+    .login.hidden { display: none; }
+    .login-card { width: min(440px, 100%); padding: 30px; border: 1px solid var(--border); border-radius: 20px; background: var(--surface); box-shadow: 0 30px 90px rgba(0,0,0,.5); }
+    .login-card h2 { margin: 20px 0 8px; font-size: 24px; }
+    .login-card p { margin: 0 0 22px; color: var(--muted); }
+    .field { display: grid; gap: 8px; }
+    .field label { color: var(--muted); font-size: 12px; }
+    .field input { width: 100%; height: 44px; padding: 0 13px; border: 1px solid var(--border); border-radius: 10px; outline: none; background: #071523; color: var(--text); }
+    .field input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(71, 167, 255, .12); }
+    .login-card .button { width: 100%; height: 44px; margin-top: 14px; }
+    .login-error { min-height: 21px; margin-top: 10px; color: var(--red); font-size: 12px; }
+    .file-warning { margin: 14px 0; padding: 11px 12px; border: 1px solid rgba(255, 180, 84, .45); border-radius: 9px; background: rgba(255, 180, 84, .08); color: var(--orange); font-size: 12px; }
+    .file-warning a { color: var(--text); font-weight: 700; }
+    .privacy-note { margin-top: 14px; color: var(--muted); font-size: 11px; }
+    .quality-list { display: grid; gap: 10px; }
+    .quality-row { display: flex; justify-content: space-between; gap: 20px; padding-bottom: 9px; border-bottom: 1px solid rgba(32, 57, 87, .6); }
+    .quality-row span:first-child { color: var(--muted); }
+    .distribution-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .distribution-item { padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: rgba(7, 17, 31, .4); }
+    .distribution-item span { display: block; color: var(--muted); font-size: 11px; }
+    .distribution-item strong { display: block; margin-top: 5px; font-size: 19px; }
+    .methodology-note { margin-top: 14px; padding: 13px 16px; border: 1px solid rgba(71, 167, 255, .28); border-radius: 11px; background: rgba(71, 167, 255, .06); color: var(--muted); }
+    .methodology-note strong { color: var(--text); }
+    .toast { position: fixed; right: 24px; bottom: 24px; z-index: 30; padding: 12px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); box-shadow: var(--shadow); opacity: 0; transform: translateY(10px); pointer-events: none; transition: .2s ease; }
+    .toast.show { opacity: 1; transform: none; }
+    @media (max-width: 1100px) {
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+      .signal-grid { grid-template-columns: repeat(3, 1fr); }
+      .span-8, .span-7, .span-6, .span-5, .span-4 { grid-column: span 12; }
+    }
+    @media (max-width: 650px) {
+      .shell { padding: 0 16px 32px; }
+      header { align-items: flex-start; }
+      .brand span { display: none; }
+      .actions .button span { display: none; }
+      .hero { display: block; padding-top: 28px; }
+      .status { margin-top: 16px; }
+      .kpis { grid-template-columns: 1fr; }
+      .signal-grid, .distribution-grid { grid-template-columns: repeat(2, 1fr); }
+      .panel-head { display: block; }
+      .tabs { width: fit-content; margin-top: 12px; }
+    }
+    /* The selected mist-white theme keeps the existing data components. */
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fa; --surface: #fff; --surface-2: #eff4fa;
+      --border: #dce5ef; --text: #172b45; --muted: #52657a;
+      --blue: #2563eb; --cyan: #0f766e; --violet: #5365b7;
+      --orange: #92400e; --red: #b91c1c;
+      --shadow: 0 4px 18px rgba(23, 43, 69, .045);
+    }
+    body { background: var(--bg); color: var(--text); font-size: 14px; }
+    .shell { max-width: 1500px; padding: 0 28px 44px; }
+    header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 24px; padding: 12px 0; background: rgba(255,255,255,.96); border-color: var(--border); }
+    .brand { white-space: nowrap; }
+    .brand strong { font-size: 18px; }
+    .brand span { font-size: 13px; }
+    .logo { width: 44px; height: 44px; flex-basis: 44px; border: 0; border-radius: 12px; box-shadow: none; }
+    .main-nav { display: flex; align-items: stretch; gap: 4px; min-width: 0; overflow-x: auto; scrollbar-width: thin; }
+    .nav-item { flex: none; border: 0; border-bottom: 2px solid transparent; padding: 0 12px; background: transparent; color: var(--muted); font-size: 14px; font-weight: 600; }
+    .nav-item:hover, .nav-item:focus-visible { color: var(--blue); background: var(--surface-2); }
+    .nav-item.active { color: var(--blue); border-bottom-color: var(--blue); background: #f1f6ff; }
+    .actions { align-items: center; }
+    .button { min-height: 40px; background: #fff; color: var(--text); border-color: var(--border); border-radius: 8px; }
+    .button:hover { border-color: var(--blue); color: var(--blue); }
+    .button.primary { background: var(--blue); color: #fff; }
+    .button.primary:hover { background: #1d4ed8; color: #fff; }
+    .button:disabled { opacity: .56; cursor: wait; }
+    button:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px solid #93b4ff; outline-offset: 2px; }
+    .export-menu { position: relative; }
+    .export-menu summary { display: flex; align-items: center; list-style: none; cursor: pointer; white-space: nowrap; }
+    .export-menu summary::-webkit-details-marker { display: none; }
+    .export-options { position: absolute; right: 0; top: calc(100% + 6px); z-index: 10; min-width: 195px; padding: 6px; border: 1px solid var(--border); border-radius: 10px; background: #fff; box-shadow: 0 14px 30px rgba(23,43,69,.12); }
+    .export-options button { display: block; width: 100%; padding: 10px 12px; border: 0; border-radius: 7px; background: transparent; color: var(--text); text-align: left; }
+    .export-options button:hover { background: var(--surface-2); }
+    .hero { position: relative; padding: 22px 0 16px; align-items: end; }
+    .eyebrow { color: var(--cyan); letter-spacing: .7px; }
+    h1 { margin: 6px 0; font-size: 34px; letter-spacing: -.5px; }
+    .hero p { color: var(--muted); }
+    .filters { margin-top: 14px; }
+    .filter-field label, .filter-label { font-size: 12px; color: var(--muted); }
+    .filter-field input { height: 40px; min-width: 140px; background: #fff; border-color: var(--border); color: var(--text); color-scheme: light; }
+    .range-button { height: 40px; min-height: 40px; }
+    .range-button.active { border-color: var(--blue); background: #eff5ff; color: var(--blue); }
+    .status { white-space: nowrap; }
+    .dot { background: var(--cyan); box-shadow: none; }
+    .status.error .dot { background: var(--red); }
+    .load-error { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 16px; padding: 12px 16px; border-radius: 10px; border: 1px solid #f0d7a7; background: #fff7e6; color: #92400e; font-weight: 600; }
+    .load-error { border-color: #f3c4c4; background: #fef2f2; color: var(--red); }
+    [hidden] { display: none !important; }
+    [data-view-section]:not(.view-visible) { display: none !important; }
+    .kpis { gap: 14px; }
+    .card, .signal { background: #fff; border-color: var(--border); box-shadow: var(--shadow); border-radius: 12px; }
+    .kpi { min-height: 150px; padding: 20px; }
+    .kpi::after { display: none; }
+    .kpi-label { color: var(--muted); font-size: 14px; }
+    .kpi-value { margin-top: 12px; font-size: 34px; font-variant-numeric: tabular-nums; }
+    .kpi-note { font-size: 12px; }
+    .grid { gap: 16px; margin-top: 16px; }
+    .panel { min-height: 310px; padding: 22px; }
+    .panel h2 { font-size: 18px; }
+    .panel-subtitle { font-size: 13px; }
+    .panel-head { margin-bottom: 14px; }
+    .tabs { margin-left: auto; background: var(--surface-2); border-color: var(--border); }
+    .tab.active, .metric-tab.active, .model-metric-tab.active { background: var(--blue); color: #fff; }
+    .trend-metric { display: flex; gap: 3px; padding: 3px; border-radius: 8px; background: var(--surface-2); }
+    .metric-tab, .model-metric-tab { border: 0; border-radius: 6px; padding: 5px 10px; background: transparent; color: var(--muted); cursor: pointer; }
+    .model-pie-layout { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+    .model-pie-layout svg { width: min(240px, 100%); height: auto; flex: 0 1 240px; }
+    .pie-legend { display: grid; gap: 10px; flex: 1 1 180px; min-width: 0; }
+    .pie-legend-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .pie-swatch { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+    .pie-legend-label { min-width: 0; overflow-wrap: anywhere; flex: 1; }
+    .pie-legend-value { white-space: nowrap; color: var(--muted); }
+    .model-columns svg { display: block; width: 100%; height: auto; }
+    .grid-line { stroke: #e8eef5; }
+    .trend-line { stroke: var(--blue); }
+    .trend-point { fill: #fff; stroke: var(--blue); }
+    .bar-track { background: #e9eef5; }
+    .bar-fill { background: var(--blue); }
+    th, td { border-color: #e8eef5; }
+    th { background: var(--surface-2); }
+    tbody tr:hover { background: #f7faff; }
+    .success-ring { background: conic-gradient(var(--cyan) var(--progress), #e9eef5 0); }
+    .success-ring::before { background: #fff; }
+    .outcome-legend { gap: 14px; }
+    .coverage-summary { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+    .coverage-summary strong { color: var(--text); }
+    .coverage-summary div + div { margin-top: 8px; }
+    .model-toolbar { display: flex; align-items: center; justify-content: space-between; margin: -4px 0 12px; color: var(--muted); font-size: 12px; }
+    .model-toolbar .button { min-height: 32px; }
+    .distribution-item { background: var(--surface-2); }
+    .quality-row { border-color: var(--border); }
+    .methodology-note { background: #fff; border-color: var(--border); }
+    .toast { background: #fff; }
+    .login { background: rgba(230,239,249,.8); }
+    .login-card { background: #fff; border-color: var(--border); box-shadow: 0 24px 60px rgba(23,43,69,.16); }
+    .login-card .logo { display: none; }
+    .field input { background: #fff; border-color: var(--border); color: var(--text); }
+    .file-warning { background: #fff7e6; color: var(--orange); }
+    .file-warning a { color: var(--blue); }
+    @media (max-width: 1250px) {
+      header { grid-template-columns: auto 1fr; }
+      .actions { grid-column: 2; justify-content: flex-end; }
+      .main-nav { grid-column: 1 / -1; grid-row: 2; }
+      .kpis { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    }
+    @media (max-width: 760px) {
+      .shell { padding: 0 16px 32px; }
+      header { gap: 8px; }
+      .brand span { display: inline; }
+      .actions { grid-column: 1 / -1; justify-content: flex-start; flex-wrap: wrap; }
+      .actions .button span { display: inline; }
+      .nav-item { min-height: 44px; }
+      .hero { display: block; }
+      .status { margin-top: 14px; }
+      .kpis { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .signal-grid, .distribution-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .panel-head { display: flex; flex-wrap: wrap; }
+      .tabs { margin-left: 0; }
+    }
+    @media (max-width: 430px) {
+      .brand-copy span { display: none; }
+      .kpi { min-height: 125px; padding: 14px; }
+      .kpi-value { font-size: 28px; }
+      .filters { gap: 8px; }
+      .range-shortcuts { flex-wrap: wrap; }
+      .range-button { flex: none; white-space: nowrap; }
+    }
+    @media print {
+      .main-nav, .export-menu, #refreshButton, #logoutButton { display: none !important; }
+      [data-view-section]:not(.view-visible) { display: block !important; }
+      .grid [data-view-section]:not(.view-visible) { display: block !important; }
+    }
+    @media print {
+      body { background: white; color: #102033; }
+      .shell { max-width: none; padding: 0; }
+      header { position: static; background: white; border-bottom-color: #ccd6e0; }
+      .actions, .filters, .login, .toast { display: none !important; }
+      .card, .signal { break-inside: avoid; box-shadow: none; background: white; border-color: #ccd6e0; }
+      .kpi-label, .kpi-note, .panel-subtitle, .signal span, .axis-label, .bar-value, th { color: #53687d; }
+      .panel { min-height: auto; }
+      .chart svg { height: 210px; }
+      .span-8, .span-7, .span-6, .span-5, .span-4 { grid-column: span 6; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="brand">
+        <div class="logo" role="img" aria-label="MicroGlow 公司 Logo">
+          <img src="/admin/assets/microglow-logo.png" alt="">
+        </div>
+        <div class="brand-copy"><strong>Micro<em class="brand-glow">Glow</em> Relay</strong><span>匿名遥测决策中心</span></div>
+      </div>
+      <nav class="main-nav" aria-label="后台分析页面">
+        <button class="nav-item active" type="button" data-view="overview" aria-current="page">概览</button>
+        <button class="nav-item" type="button" data-view="growth">增长与留存</button>
+        <button class="nav-item" type="button" data-view="models">版本与模型</button>
+        <button class="nav-item" type="button" data-view="quality">调用质量</button>
+        <button class="nav-item" type="button" data-view="trust">数据质量</button>
+      </nav>
+      <div class="actions">
+        <button id="refreshButton" class="button primary" type="button">刷新数据</button>
+        <details class="export-menu"><summary class="button">导出数据</summary><div class="export-options">
+          <button id="exportButton" type="button">完整汇总 JSON</button>
+          <button id="csvButton" type="button">每日趋势 CSV</button>
+          <button id="printButton" type="button">当前视图 PDF</button>
+        </div></details>
+        <button id="logoutButton" class="button" type="button">退出</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <div class="eyebrow">隐私优先的数据分析</div>
+        <h1>用户使用概览</h1>
+        <p>基于匿名每日汇总，为产品与资源决策提供依据。</p>
+        <p id="rangeSummary" class="panel-subtitle">统计范围：全部数据 · UTC</p>
+        <div class="filters">
+          <div class="filter-field"><label for="fromDay">开始日期</label><input id="fromDay" type="date"></div>
+          <div class="filter-field"><label for="toDay">结束日期</label><input id="toDay" type="date"></div>
+          <div class="filter-field">
+            <span class="filter-label">快捷范围</span>
+            <div class="range-shortcuts" role="group" aria-label="快捷日期范围">
+              <button class="button range-button" data-range-days="1" title="截至结束日期的当日" type="button">当天</button>
+              <button class="button range-button" data-range-days="7" title="截至结束日期的近 7 日" type="button">近 7 天</button>
+              <button class="button range-button" data-range-days="30" title="截至结束日期的近 30 日" type="button">近 30 天</button>
+              <button class="button range-button" data-range-days="90" title="截至结束日期的近 90 日" type="button">近 90 天</button>
+              <button class="button range-button" data-range-days="365" title="截至结束日期的近 365 日" type="button">近 365 天</button>
+            </div>
+          </div>
+          <button id="applyFilter" class="button" type="button">应用</button>
+          <button id="clearFilter" class="button" type="button">全部时间</button>
+        </div>
+      </div>
+      <div class="status"><span class="dot"></span><span id="updatedAt">等待载入</span></div>
+    </section>
+
+    <div id="loadError" class="load-error" role="alert" hidden><span id="loadErrorText"></span><button id="retryButton" class="button" type="button">重试</button></div>
+
+    <section class="signal-grid" data-view-section="growth" aria-label="增长与留存">
+      <div class="signal"><span>日活跃安装</span><strong id="dau">—</strong></div>
+      <div class="signal"><span>7 日活跃安装</span><strong id="wau">—</strong></div>
+      <div class="signal"><span>30 日活跃安装</span><strong id="mau">—</strong></div>
+      <div class="signal"><span>新增安装</span><strong id="newInstallations">—</strong></div>
+      <div class="signal"><span>已有安装活跃数</span><strong id="returningInstallations">—</strong></div>
+      <div class="signal"><span>周调用增长</span><strong id="weekGrowth">—</strong></div>
+      <div class="signal"><span>7 日留存</span><strong id="retention7">—</strong></div>
+      <div class="signal"><span>30 日留存</span><strong id="retention30">—</strong></div>
+    </section>
+
+    <section class="kpis" aria-label="核心指标">
+      <article class="card kpi" style="--accent: var(--cyan)"><div class="kpi-label">活跃安装</div><div id="activeInstallations" class="kpi-value">—</div><div class="kpi-note">匿名安装去重</div></article>
+      <article class="card kpi" style="--accent: var(--blue)"><div class="kpi-label">API 调用总量</div><div id="totalCalls" class="kpi-value">—</div><div class="kpi-note">当前日期范围</div></article>
+      <article class="card kpi" style="--accent: var(--violet)"><div class="kpi-label">Token 总量</div><div id="totalTokens" class="kpi-value">—</div><div class="kpi-note">输入与输出 Token</div></article>
+      <article class="card kpi" style="--accent: var(--cyan)"><div class="kpi-label">成功率</div><div id="successRate" class="kpi-value">—</div><div class="kpi-note">成功调用 / 总调用</div></article>
+      <article class="card kpi" style="--accent: var(--red)"><div class="kpi-label">错误数量</div><div id="errorCount" class="kpi-value">—</div><div class="kpi-note">只含匿名汇总计数</div></article>
+    </section>
+    <div class="methodology-note" data-view-section="trust"><strong>统计口径：</strong>全部统计使用 UTC；调用总量包含成功和失败请求；Token 总量为输入加输出；日活跃安装按截止日自然日统计，7 日和 30 日活跃安装为截至该日的滚动统计。</div>
+
+    <section class="grid">
+      <article class="card panel span-8" data-view-section="overview growth">
+        <div class="panel-head">
+          <div><h2>使用趋势</h2><div id="trendSubtitle" class="panel-subtitle">API 调用随时间变化</div></div>
+          <div class="trend-metric" role="group" aria-label="趋势指标"><button class="metric-tab active" data-metric="api_call_count" type="button" aria-pressed="true">调用量</button><button class="metric-tab" data-metric="total_tokens" type="button" aria-pressed="false">Token</button></div>
+          <div class="tabs" role="tablist">
+            <button class="tab active" data-period="daily" type="button">日</button>
+            <button class="tab" data-period="weekly" type="button">周</button>
+            <button class="tab" data-period="monthly" type="button">月</button>
+          </div>
+        </div>
+        <div id="trendChart" class="chart"></div>
+      </article>
+
+      <article class="card panel span-4" data-view-section="overview quality">
+        <div class="panel-head"><div><h2>调用质量</h2><div class="panel-subtitle">整体成功率与错误量</div></div></div>
+        <div id="successRing" class="success-ring" style="--progress: 0%"><div class="ring-label"><strong id="ringRate">—</strong><span>成功率</span></div></div>
+        <div class="outcome-legend"><span><i class="legend-mark" style="background:var(--cyan)"></i><span id="successLegend">成功 —</span></span><span><i class="legend-mark" style="background:var(--red)"></i><span id="errorLegend">错误 —</span></span></div>
+        <div id="coverageSummary" class="coverage-summary"></div>
+      </article>
+
+      <article class="card panel span-6" data-view-section="trust">
+        <div class="panel-head"><div><h2>国家分布</h2><div class="panel-subtitle">按 API 调用次数排序</div></div></div>
+        <div id="countryBars" class="bars"></div>
+      </article>
+
+      <article class="card panel span-6" data-view-section="growth">
+        <div class="panel-head"><div><h2>使用时长区间</h2><div class="panel-subtitle">安装累计活跃分钟分布</div></div></div>
+        <div id="durationBars" class="bars"></div>
+      </article>
+
+      <article class="card panel span-6" data-view-section="models">
+        <div class="panel-head"><div><h2>模型调用占比</h2><div id="modelPieSubtitle" class="panel-subtitle">按调用次数统计，包含成功和失败请求</div></div></div>
+        <div id="modelUsagePie" class="model-pie-layout"></div>
+      </article>
+
+      <article class="card panel span-6" data-view-section="models">
+        <div class="panel-head"><div><h2>模型调用量与 Token</h2><div id="modelUsageSubtitle" class="panel-subtitle">当前日期范围内的调用次数</div></div><div class="trend-metric" role="group" aria-label="模型柱状图指标"><button class="model-metric-tab active" data-model-metric="api_call_count" type="button" aria-pressed="true">调用次数</button><button class="model-metric-tab" data-model-metric="total_tokens" type="button" aria-pressed="false">Token</button></div></div>
+        <div id="modelUsageBars" class="model-columns"></div>
+      </article>
+
+      <article class="card panel span-12" data-view-section="models">
+        <div class="panel-head"><div><h2>Relay 版本使用分布</h2><div id="versionUsageSubtitle" class="panel-subtitle">当前日期范围内的调用量占比</div></div><div class="trend-metric" role="group" aria-label="版本分布指标"><button class="model-metric-tab active" data-model-metric="api_call_count" type="button" aria-pressed="true">调用次数</button><button class="model-metric-tab" data-model-metric="total_tokens" type="button" aria-pressed="false">Token</button></div></div>
+        <div id="versionUsageBars" class="bars"></div>
+      </article>
+
+      <article class="card panel span-12" data-view-section="overview models">
+        <div class="panel-head"><div><h2>Relay 版本 / 模型排名</h2><div class="panel-subtitle">按 Relay 版本和模型汇总调用量与 Token 消耗</div></div></div>
+        <div class="model-toolbar"><span id="modelCount">当前范围模型排行</span><button id="showAllModels" class="button" type="button">查看全部</button></div>
+        <div class="table-wrap"><table><thead><tr><th>Relay 版本</th><th>模型</th><th>调用渠道</th><th class="number">调用次数</th><th class="number token-column">Token</th><th class="number">调用份额</th><th class="number">Token 份额</th></tr></thead><tbody id="modelTable"></tbody></table></div>
+      </article>
+
+      <article class="card panel span-12" data-view-section="models">
+        <div class="panel-head"><div><h2>Relay 版本 / 模型月度份额趋势</h2><div class="panel-subtitle">观察不同 Relay 版本的模型使用及调用份额变化</div></div></div>
+        <div class="table-wrap"><table><thead><tr><th>月份</th><th>Relay 版本</th><th>模型</th><th class="number">调用次数</th><th class="number token-column">Token</th><th class="number">当月调用份额</th></tr></thead><tbody id="versionModelTrendTable"></tbody></table></div>
+      </article>
+
+      <article class="card panel span-6" data-view-section="growth">
+        <div class="panel-head"><div><h2>单安装使用强度</h2><div class="panel-subtitle">均值与 P50 / P90 / P99，避免平均数失真</div></div></div>
+        <div id="distributionGrid" class="distribution-grid"></div>
+      </article>
+
+      <article class="card panel span-6" data-view-section="trust">
+        <div class="panel-head"><div><h2>客户端版本覆盖</h2><div class="panel-subtitle">活跃安装和调用量分布</div></div></div>
+        <div class="table-wrap"><table><thead><tr><th>版本</th><th class="number">活跃安装</th><th class="number">调用</th><th class="number token-column">Token</th></tr></thead><tbody id="versionTable"></tbody></table></div>
+      </article>
+
+      <article class="card panel span-6" data-view-section="quality">
+        <div class="panel-head"><div><h2>延迟区间</h2><div class="panel-subtitle">schema v2 匿名汇总，不含原始延迟</div></div></div>
+        <div id="latencyBars" class="bars"></div>
+      </article>
+
+      <article class="card panel span-6" data-view-section="quality">
+        <div class="panel-head"><div><h2>标准化错误类别</h2><div class="panel-subtitle">schema v2 汇总，不保存原始错误消息</div></div></div>
+        <div id="errorBars" class="bars"></div>
+      </article>
+
+      <article class="card panel span-6" data-view-section="trust">
+        <div class="panel-head"><div><h2>数据质量</h2><div class="panel-subtitle">接收状态、数据覆盖与新鲜度</div></div></div>
+        <div id="dataQuality" class="quality-list"></div>
+      </article>
+
+      <article class="card panel span-6" data-view-section="trust">
+        <div class="panel-head"><div><h2>Schema / Consent 覆盖</h2><div class="panel-subtitle">批次采用的结构和同意版本</div></div></div>
+        <div class="table-wrap"><table><thead><tr><th>Schema</th><th>Consent</th><th class="number">批次</th><th class="number">汇总行</th></tr></thead><tbody id="schemaTable"></tbody></table></div>
+      </article>
+    </section>
+  </div>
+
+  <div id="login" class="login">
+    <form id="loginForm" class="login-card">
+      <div class="logo">MG</div>
+      <h2>管理员验证</h2>
+      <p>输入独立的 ADMIN_TOKEN 以读取匿名汇总数据。</p>
+      <div id="fileWarning" class="file-warning" hidden>当前页面由本地文件打开，无法连接后台。请访问 <a href="https://localhost:9443/admin/">https://localhost:9443/admin/</a></div>
+      <div class="field"><label for="tokenInput">ADMIN_TOKEN</label><input id="tokenInput" type="password" autocomplete="off" required></div>
+      <button id="loginButton" class="button primary" type="submit">进入决策中心</button>
+      <div id="loginError" class="login-error" role="alert"></div>
+      <div class="privacy-note">Token 仅保存在当前页面内存中，不写入 Cookie、LocalStorage 或 SessionStorage。</div>
+    </form>
+  </div>
+  <div id="toast" class="toast" role="status"></div>
+
+  <script>
+    (() => {
+      "use strict";
+      const $ = (id) => document.getElementById(id);
+      const state = { token: "", data: null, period: "daily", metric: "api_call_count", modelMetric: "api_call_count", view: "overview" };
+      const number = new Intl.NumberFormat("zh-CN", { notation: "compact", maximumFractionDigits: 1 });
+      const exact = new Intl.NumberFormat("zh-CN");
+
+      const format = (value) => number.format(Number(value || 0));
+      const percent = (value) => `${(Number(value || 0) * 100).toFixed(1)}%`;
+      const retentionPercent = (value) => value === null || value === undefined ? "数据不足" : percent(value);
+      const formatUtc = (value) => value ? `${String(value).replace("T", " ").replace("+00:00", "")} UTC` : "暂无";
+      const growth = (value) => value === null || value === undefined ? "无法比较" : `${value >= 0 ? "+" : ""}${(Number(value) * 100).toFixed(1)}%`;
+      const empty = (text) => { const node = document.createElement("div"); node.className = "empty"; node.textContent = text; return node; };
+      const toast = (message) => { $("toast").textContent = message; $("toast").classList.add("show"); setTimeout(() => $("toast").classList.remove("show"), 2200); };
+      const shiftUtcDays = (isoDay, offset) => {
+        const day = new Date(`${isoDay}T00:00:00Z`);
+        day.setUTCDate(day.getUTCDate() + offset);
+        return day.toISOString().slice(0, 10);
+      };
+      const clearActiveRange = () => document.querySelectorAll(".range-button").forEach((button) => button.classList.remove("active"));
+      function setView(view) {
+        state.view = view;
+        document.querySelectorAll(".nav-item").forEach((button) => {
+          const active = button.dataset.view === view;
+          button.classList.toggle("active", active);
+          if (active) button.setAttribute("aria-current", "page"); else button.removeAttribute("aria-current");
+        });
+        document.querySelectorAll("[data-view-section]").forEach((node) => {
+          node.classList.toggle("view-visible", node.dataset.viewSection.split(" ").includes(view));
+        });
+        if (state.data) renderModels(state.data.by_relay_version_model || []);
+      }
+
+      function applyQuickRange(button) {
+        const days = Number(button.dataset.rangeDays);
+        const latestDataDay = state.data && state.data.data_quality && state.data.data_quality.latest_day;
+        // Recompute the anchor on every click. Reusing the current end-date
+        // input froze the quick ranges at whatever day was set first, so new
+        // data never moved them.
+        const endDay = latestDataDay || new Date().toISOString().slice(0, 10);
+        $("toDay").value = endDay;
+        $("fromDay").value = shiftUtcDays(endDay, -(days - 1));
+        clearActiveRange();
+        button.classList.add("active");
+        loadSummary();
+      }
+
+      async function loadSummary() {
+        if (!state.token) return;
+        $("refreshButton").disabled = true;
+        $("refreshButton").textContent = "加载中…";
+        $("loadError").hidden = true;
+        try {
+          const query = new URLSearchParams();
+          if ($("fromDay").value) query.set("from_day", $("fromDay").value);
+          if ($("toDay").value) query.set("to_day", $("toDay").value);
+          const response = await fetch(`/admin/usage/summary${query.size ? `?${query}` : ""}`, {
+            headers: { "Authorization": `Bearer ${state.token}` },
+            cache: "no-store"
+          });
+          if (response.status === 401) {
+            state.token = "";
+            $("login").classList.remove("hidden");
+            $("loginError").textContent = "Token 无效，请重新输入。";
+            return;
+          }
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          state.data = await response.json();
+          render();
+          document.querySelector(".status").classList.remove("error");
+          $("login").classList.add("hidden");
+          $("loginError").textContent = "";
+          $("tokenInput").value = "";
+          toast("数据已更新");
+        } catch (error) {
+          $("loadErrorText").textContent = `加载失败：${error.message}。${state.data ? "当前显示的是上次成功加载的数据。" : "请重试。"}`;
+          $("loadError").hidden = false;
+          document.querySelector(".status").classList.add("error");
+        } finally {
+          $("refreshButton").disabled = false;
+          $("refreshButton").textContent = "刷新数据";
+        }
+      }
+
+      function render() {
+        const data = state.data;
+        const outcomes = data.outcomes || {};
+        const totalCalls = Number(outcomes.total || 0);
+        const totalTokens = Number(outcomes.total_tokens || 0);
+        $("activeInstallations").textContent = format(data.active_installations);
+        $("totalCalls").textContent = format(totalCalls);
+        $("totalCalls").title = exact.format(totalCalls);
+        $("totalTokens").textContent = format(totalTokens);
+        $("totalTokens").title = exact.format(totalTokens);
+        $("successRate").textContent = totalCalls ? percent(outcomes.success_rate) : "暂无调用";
+        $("errorCount").textContent = format(outcomes.error);
+        $("updatedAt").textContent = `生成于 ${formatUtc(data.generated_at)}`;
+        const filterFrom = data.filters && data.filters.from_day;
+        const filterTo = data.filters && data.filters.to_day;
+        const latestDataDay = data.data_quality && data.data_quality.latest_day;
+        let rangeText = `统计范围：${filterFrom || "最早数据"} 至 ${filterTo || "最新数据"} · ${data.timezone || "UTC"}`;
+        if (latestDataDay && filterTo && latestDataDay < filterTo) {
+          const lagDays = Math.round(
+            (Date.parse(`${filterTo}T00:00:00Z`) - Date.parse(`${latestDataDay}T00:00:00Z`)) / 86400000,
+          );
+          rangeText += `（数据截止 ${latestDataDay}，延迟 ${format(lagDays)} 天）`;
+        }
+        $("rangeSummary").textContent = rangeText;
+        const activity = data.activity || {};
+        const retention = data.retention || {};
+        $("dau").textContent = format(activity.dau);
+        $("wau").textContent = format(activity.wau);
+        $("mau").textContent = format(activity.mau);
+        $("newInstallations").textContent = format(activity.new_installations);
+        $("returningInstallations").textContent = format(activity.returning_installations);
+        const noGrowthBasis = !totalCalls && !Number(activity.previous_week_calls || 0);
+        $("weekGrowth").textContent = noGrowthBasis ? "无法比较" : growth(activity.week_call_growth);
+        $("weekGrowth").className = noGrowthBasis || activity.week_call_growth === null || activity.week_call_growth === undefined ? "" : Number(activity.week_call_growth) < 0 ? "negative" : "positive";
+        $("retention7").textContent = retentionPercent(retention.day_7_rate);
+        $("retention30").textContent = retentionPercent(retention.day_30_rate);
+
+        const rate = Math.max(0, Math.min(1, Number(outcomes.success_rate || 0)));
+        $("successRing").style.setProperty("--progress", `${rate * 100}%`);
+        $("ringRate").textContent = totalCalls ? percent(rate) : "暂无调用";
+        $("successLegend").textContent = `成功 ${format(outcomes.success)}`;
+        $("errorLegend").textContent = `错误 ${format(outcomes.error)}`;
+
+        const latency = data.latency_buckets || {};
+        const latencyCount = Object.values(latency).reduce((sum, value) => sum + Number(value || 0), 0);
+        const classifiedCount = (data.error_categories || []).reduce((sum, row) => sum + Number(row.count || 0), 0);
+        $("coverageSummary").replaceChildren();
+        for (const [label, count, total] of [["延迟覆盖", latencyCount, totalCalls], ["错误分类覆盖", classifiedCount, Number(outcomes.error || 0)]]) {
+          const line = document.createElement("div");
+          const title = document.createElement("strong"); title.textContent = `${label} ${exact.format(count)} / ${exact.format(total)}`;
+          line.append(title, document.createTextNode(total ? ` · ${percent(count / total)}` : " · 暂无数据"));
+          $("coverageSummary").appendChild(line);
+        }
+        renderTrend();
+        const countryRows = (data.by_country || []).map((row) => ({
+          ...row,
+          country_label: row.country_code || "国别来源缺失",
+        }));
+        renderBars($("countryBars"), countryRows, "country_label", "api_call_count", (row) => `${format(row.api_call_count)} 次 · ${format(row.total_tokens)} Token`);
+        renderBars($("durationBars"), data.active_minutes_ranges || [], "range", "active_installations", (row) => `${format(row.active_installations)} 个活跃安装`);
+        renderModels(data.by_relay_version_model || []);
+        renderModelUsageCharts();
+        renderVersionModelTrends(data.relay_version_model_trends || []);
+        renderDistribution(data.usage_distribution || {});
+        renderVersions(data.client_versions || []);
+        renderBars($("latencyBars"), latencyRows(data.latency_buckets || {}), "label", "count", (row) => `${format(row.count)} 次`);
+        renderBars($("errorBars"), errorRows(data.error_categories || []), "label", "count", (row) => `${format(row.count)} 次`);
+        renderDataQuality(data.data_quality || {});
+        renderSchemas(data.schema_coverage || []);
+      }
+
+      function summarizeModelUsage(rows, dimension, metric) {
+        const groups = new Map();
+        rows.forEach((row) => {
+          const key = dimension === "client_version" ? String(row.client_version || "未标注") : JSON.stringify([row.model, row.model_type]);
+          if (!groups.has(key)) groups.set(key, { label: dimension === "client_version" ? key : `${row.model || "未标注"}${row.model_type === "model_family" ? "（模型族）" : ""}`, value: 0 });
+          groups.get(key).value += Number(row[metric] || 0);
+        });
+        const sorted = Array.from(groups.values()).sort((a, b) => b.value - a.value || a.label.localeCompare(b.label));
+        const total = sorted.reduce((sum, row) => sum + row.value, 0);
+        if (sorted.length <= 10) return { rows: sorted, total, grouped: false };
+        return { rows: [...sorted.slice(0, 9), { label: dimension === "client_version" ? "其余版本" : "其余模型", value: sorted.slice(9).reduce((sum, row) => sum + row.value, 0) }], total, grouped: true };
+      }
+
+      function renderModelUsageCharts() {
+        const rows = state.data.by_relay_version_model || [];
+        const metric = state.modelMetric;
+        const name = metric === "total_tokens" ? "Token" : "调用量";
+        const unit = metric === "total_tokens" ? " Token" : " 次";
+        const versions = summarizeModelUsage(rows, "client_version", metric);
+        $("versionUsageSubtitle").textContent = `当前日期范围 · ${name}占比${versions.grouped ? " · 前 9 项及其余" : ""}`;
+        renderBars($("versionUsageBars"), versions.rows, "label", "value", (row) => `${format(row.value)}${unit} · ${percent(versions.total ? row.value / versions.total : 0)}`, versions.total);
+        const models = summarizeModelUsage(rows, "model", metric);
+        $("modelUsageSubtitle").textContent = `当前日期范围 · ${name}${models.grouped ? " · 前 9 项及其余" : ""}`;
+        renderModelColumnChart($("modelUsageBars"), models.rows, unit);
+        const calls = summarizeModelUsage(rows, "model", "api_call_count");
+        $("modelPieSubtitle").textContent = `按调用次数统计，包含成功和失败请求${calls.grouped ? " · 前 9 项及其余" : ""}`;
+        renderModelPieChart($("modelUsagePie"), calls);
+      }
+
+      function modelChartNode(tag, attributes = {}, content) {
+        const node = document.createElementNS("http://www.w3.org/2000/svg", tag);
+        Object.entries(attributes).forEach(([key, value]) => node.setAttribute(key, String(value)));
+        if (content !== undefined) node.textContent = content;
+        return node;
+      }
+
+      function renderModelPieChart(container, summary) {
+        container.replaceChildren();
+        if (!summary.total) { container.appendChild(empty("当前范围暂无调用数据")); return; }
+        const colors = ["#2463eb", "#00a9bd", "#7c5ce0", "#ef9438", "#dc536a", "#24956c", "#6182bc", "#b66aaf", "#84624f", "#8995a6"];
+        const svg = modelChartNode("svg", { viewBox: "0 0 240 240", role: "img", "aria-label": "各模型调用次数占比饼图" });
+        const legend = document.createElement("div"); legend.className = "pie-legend";
+        let angle = -Math.PI / 2;
+        summary.rows.filter((row) => row.value > 0).forEach((row, index) => {
+          const share = row.value / summary.total;
+          const end = angle + share * Math.PI * 2;
+          const color = colors[index % colors.length];
+          const slice = share >= 1 ? modelChartNode("circle", { cx: 120, cy: 120, r: 112, fill: color }) : modelChartNode("path", {
+            d: `M 120 120 L ${120 + 112 * Math.cos(angle)} ${120 + 112 * Math.sin(angle)} A 112 112 0 ${share > .5 ? 1 : 0} 1 ${120 + 112 * Math.cos(end)} ${120 + 112 * Math.sin(end)} Z`, fill: color, stroke: "#fff", "stroke-width": 1,
+          });
+          slice.appendChild(modelChartNode("title", {}, `${row.label}：${exact.format(row.value)} 次 · ${percent(share)}`));
+          svg.appendChild(slice); angle = end;
+          const line = document.createElement("div"); line.className = "pie-legend-row";
+          const swatch = document.createElement("span"); swatch.className = "pie-swatch"; swatch.style.background = color;
+          const label = document.createElement("span"); label.className = "pie-legend-label"; label.textContent = row.label;
+          const value = document.createElement("span"); value.className = "pie-legend-value"; value.textContent = percent(share); value.title = `${exact.format(row.value)} 次`;
+          line.append(swatch, label, value); legend.appendChild(line);
+        });
+        container.append(svg, legend);
+      }
+
+      function renderModelColumnChart(container, rows, unit) {
+        container.replaceChildren();
+        if (!rows.length || !rows.some((row) => row.value > 0)) { container.appendChild(empty("当前范围暂无数据")); return; }
+        const svg = modelChartNode("svg", { viewBox: "0 0 680 390", role: "img", "aria-label": unit.trim() === "Token" ? "各模型 Token 总量柱状图" : "各模型调用次数柱状图" });
+        const left = 65, right = 665, top = 30, bottom = 265;
+        const maximum = Math.max(...rows.map((row) => row.value), 1);
+        for (let step = 0; step <= 4; step++) {
+          const y = bottom - (bottom - top) * step / 4;
+          svg.appendChild(modelChartNode("line", { x1: left, x2: right, y1: y, y2: y, class: "grid-line" }));
+          svg.appendChild(modelChartNode("text", { x: left - 9, y: y + 4, "text-anchor": "end", class: "axis-label" }, format(maximum * step / 4)));
+        }
+        const slot = (right - left) / rows.length;
+        rows.forEach((row, index) => {
+          const x = left + slot * (index + .5);
+          const height = (bottom - top) * row.value / maximum;
+          const bar = modelChartNode("rect", { x: x - Math.min(slot * .3, 25), y: bottom - height, width: Math.min(slot * .6, 50), height, rx: 3, fill: "#2463eb" });
+          bar.appendChild(modelChartNode("title", {}, `${row.label}：${exact.format(row.value)}${unit}`)); svg.appendChild(bar);
+          svg.appendChild(modelChartNode("text", { x, y: bottom - height - 7, "text-anchor": "middle", class: "axis-label" }, format(row.value)));
+          const label = modelChartNode("text", { x, y: bottom + 18, transform: `rotate(-35 ${x} ${bottom + 18})`, "text-anchor": "end", class: "axis-label" }, row.label.length > 19 ? `${row.label.slice(0, 18)}…` : row.label);
+          label.appendChild(modelChartNode("title", {}, row.label)); svg.appendChild(label);
+        });
+        container.appendChild(svg);
+      }
+
+      function renderBars(container, rows, labelKey, valueKey, valueLabel, scaleTotal) {
+        container.replaceChildren();
+        if (!rows.length) { container.appendChild(empty("暂无数据")); return; }
+        const maximum = Math.max(scaleTotal === undefined ? Math.max(...rows.map((row) => Number(row[valueKey] || 0))) : scaleTotal, 1);
+        rows.slice(0, 10).forEach((row) => {
+          const wrapper = document.createElement("div"); wrapper.className = "bar-row";
+          const meta = document.createElement("div"); meta.className = "bar-meta";
+          const label = document.createElement("span"); label.className = "bar-label"; label.textContent = row[labelKey];
+          const value = document.createElement("span"); value.className = "bar-value"; value.textContent = valueLabel(row);
+          value.title = exact.format(Number(row[valueKey] || 0));
+          meta.append(label, value);
+          const track = document.createElement("div"); track.className = "bar-track";
+          const fill = document.createElement("div"); fill.className = "bar-fill"; fill.style.width = `${Number(row[valueKey] || 0) / maximum * 100}%`;
+          track.appendChild(fill); wrapper.append(meta, track); container.appendChild(wrapper);
+        });
+      }
+
+      function renderModels(rows) {
+        const body = $("modelTable"); body.replaceChildren();
+        const limit = state.view === "overview" ? 5 : 30;
+        $("modelCount").textContent = `显示前 ${Math.min(rows.length, limit)} 项 · 共 ${rows.length} 项`;
+        $("showAllModels").hidden = state.view !== "overview" || rows.length <= limit;
+        if (!rows.length) {
+          const row = document.createElement("tr"); const cell = document.createElement("td"); cell.colSpan = 7; cell.appendChild(empty("暂无 Relay 版本 / 模型数据")); row.appendChild(cell); body.appendChild(row); return;
+        }
+        rows.slice(0, limit).forEach((item) => {
+          const row = document.createElement("tr");
+          const values = [item.client_version, item.model, "未标注", exact.format(item.api_call_count || 0), exact.format(item.total_tokens || 0), percent(item.call_share), percent(item.token_share)];
+          values.forEach((value, index) => { const cell = document.createElement("td"); cell.textContent = value; if (index >= 3) cell.className = "number"; if (index === 4) cell.classList.add("token-column"); row.appendChild(cell); });
+          if (String(item.client_version || "").includes("demo") || String(item.provider || "").startsWith("demo-")) row.cells[1].append(" · 演示");
+          body.appendChild(row);
+        });
+      }
+
+      function renderDistribution(data) {
+        const container = $("distributionGrid"); container.replaceChildren();
+        const sample = Number(data.sample_size || 0);
+        const metrics = [
+          ["平均调用", data.avg_calls, 1], ["调用 P50", data.calls_p50, 2], ["调用 P90", data.calls_p90, 10],
+          ["调用 P99", data.calls_p99, 100], ["Token P50", data.tokens_p50, 2], ["Token P90", data.tokens_p90, 10],
+          ["Token P99", data.tokens_p99, 100], ["平均 Token", data.avg_tokens, 1], ["平均活跃分钟", data.avg_active_minutes, 1],
+        ];
+        metrics.forEach(([label, value, minimum]) => {
+          const item = document.createElement("div"); item.className = "distribution-item";
+          const name = document.createElement("span"); name.textContent = `${label} · n=${sample}`;
+          const amount = document.createElement("strong"); amount.textContent = sample < minimum || value === null ? "样本不足" : format(value);
+          item.append(name, amount); container.appendChild(item);
+        });
+      }
+
+      function renderVersionModelTrends(rows) {
+        const body = $("versionModelTrendTable"); body.replaceChildren();
+        const monthlyTotals = {};
+        rows.forEach((item) => { monthlyTotals[item.period] = (monthlyTotals[item.period] || 0) + Number(item.api_call_count || 0); });
+        rows.slice().reverse().slice(0, 36).forEach((item) => {
+          const values = [String(item.period || "").slice(0, 7), item.client_version, item.model, exact.format(item.api_call_count || 0), exact.format(item.total_tokens || 0), percent(Number(item.api_call_count || 0) / (monthlyTotals[item.period] || 1))];
+          const row = document.createElement("tr");
+          values.forEach((value, index) => { const cell = document.createElement("td"); cell.textContent = value; if (index >= 3) cell.className = "number"; if (index === 4) cell.classList.add("token-column"); row.appendChild(cell); });
+          body.appendChild(row);
+        });
+        if (!rows.length) { const row = document.createElement("tr"); const cell = document.createElement("td"); cell.colSpan = 6; cell.textContent = "暂无月度份额数据"; row.appendChild(cell); body.appendChild(row); }
+      }
+
+      function renderVersions(rows) {
+        const body = $("versionTable"); body.replaceChildren();
+        rows.forEach((item) => {
+          const row = document.createElement("tr");
+          [item.client_version, exact.format(item.active_installations || 0), exact.format(item.api_call_count || 0), exact.format(item.total_tokens || 0)].forEach((value, index) => {
+            const cell = document.createElement("td"); cell.textContent = value; if (index) cell.className = "number"; if (index === 3) cell.classList.add("token-column"); row.appendChild(cell);
+          });
+          body.appendChild(row);
+        });
+        if (!rows.length) { const row = document.createElement("tr"); const cell = document.createElement("td"); cell.colSpan = 4; cell.textContent = "暂无版本数据"; row.appendChild(cell); body.appendChild(row); }
+      }
+
+      function latencyRows(data) {
+        return [
+          { label: "< 1 秒", count: data.lt_1s || 0 },
+          { label: "1–3 秒", count: data.from_1s_to_3s || 0 },
+          { label: "3–10 秒", count: data.from_3s_to_10s || 0 },
+          { label: "≥ 10 秒", count: data.gte_10s || 0 },
+        ];
+      }
+
+      function errorRows(rows) {
+        const labels = { authentication: "认证失败", rate_limit: "频率限制", timeout: "超时", unavailable: "服务不可用", invalid_request: "请求无效", other: "其他" };
+        return rows.map((row) => ({ label: labels[row.category] || row.category, count: row.count || 0 }));
+      }
+
+      function renderDataQuality(data) {
+        const container = $("dataQuality"); container.replaceChildren();
+        const rows = [
+          ["最后成功接收", formatUtc(data.last_successful_received_at)],
+          ["数据起始日", data.first_day ? `${data.first_day} UTC` : "暂无"], ["数据截止日", data.latest_day ? `${data.latest_day} UTC` : "暂无"],
+          ["数据延迟", data.freshness_days === null || data.freshness_days === undefined ? "暂无" : `${data.freshness_days} 天`],
+          ["每日聚合行", exact.format(data.aggregate_rows || 0)], ["活跃安装", exact.format(data.active_installations || 0)],
+          ["客户端版本数", exact.format(data.client_versions || 0)],
+        ];
+        rows.forEach(([label, value]) => { const row = document.createElement("div"); row.className = "quality-row"; const left = document.createElement("span"); left.textContent = label; const right = document.createElement("strong"); right.textContent = value; row.append(left, right); container.appendChild(row); });
+      }
+
+      function renderSchemas(rows) {
+        const body = $("schemaTable"); body.replaceChildren();
+        rows.forEach((item) => {
+          const row = document.createElement("tr");
+          [item.schema_version, item.consent_version, exact.format(item.batches || 0), exact.format(item.rows || 0)].forEach((value, index) => { const cell = document.createElement("td"); cell.textContent = value; if (index >= 2) cell.className = "number"; row.appendChild(cell); });
+          body.appendChild(row);
+        });
+      }
+
+      function exportCsv() {
+        if (!state.data) return;
+        const columns = ["period", "api_call_count", "total_tokens", "active_installations", "new_installations", "returning_installations"];
+        const schema = (state.data.schema_coverage || []).map((item) => `v${item.schema_version}/${item.consent_version}`).join(";") || "none";
+        const methodology = state.data.methodology || {};
+        const metadata = [
+          ["generated_at", state.data.generated_at], ["timezone", state.data.timezone || "UTC"],
+          ["from_day", state.data.filters.from_day || "all"], ["to_day", state.data.filters.to_day || "all"],
+          ["schema_and_consent", schema], ["active_unit", methodology.active_unit || "active_installation"],
+          ["api_call_total", methodology.api_call_total || "includes successful and failed calls"],
+          ["token_total", methodology.token_total || "input_tokens + output_tokens"],
+          ["retention_day_7", methodology.retention_day_7 || "exact day 7"],
+          ["retention_day_30", methodology.retention_day_30 || "exact day 30"],
+        ].map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(","));
+        const rows = [columns];
+        (state.data.periods.daily || []).forEach((item) => rows.push(columns.map((key) => item[key] ?? "")));
+        const csv = metadata.concat([""], rows.map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(","))).join("\r\n");
+        download(new Blob(["\ufeff", csv], { type: "text/csv;charset=utf-8" }), `microglow-usage-${new Date().toISOString().slice(0, 10)}.csv`);
+      }
+
+      function download(blob, filename) {
+        const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = filename; link.click(); URL.revokeObjectURL(url);
+      }
+
+      function renderTrend() {
+        const container = $("trendChart"); container.replaceChildren();
+        const rows = (state.data.periods && state.data.periods[state.period]) || [];
+        if (!rows.length) { container.appendChild(empty("当前周期暂无趋势数据")); return; }
+        const metric = state.metric;
+        const metricLabel = metric === "total_tokens" ? "Token" : "API 调用";
+        $("trendSubtitle").textContent = `${metricLabel}随时间变化 · ${metric === "total_tokens" ? "Token" : "次"}`;
+        const svgNS = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(svgNS, "svg"); svg.setAttribute("viewBox", "0 0 800 260"); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", `${metricLabel}趋势图：${rows.map((row) => `${row.period} ${exact.format(row[metric] || 0)}`).join("；")}`);
+        const defs = document.createElementNS(svgNS, "defs");
+        const gradient = document.createElementNS(svgNS, "linearGradient"); gradient.id = "trendGradient"; gradient.setAttribute("x1", "0"); gradient.setAttribute("y1", "0"); gradient.setAttribute("x2", "0"); gradient.setAttribute("y2", "1");
+        [["0%", ".16"], ["100%", "0"]].forEach(([offset, opacity]) => { const stop = document.createElementNS(svgNS, "stop"); stop.setAttribute("offset", offset); stop.setAttribute("stop-color", "#2563eb"); stop.setAttribute("stop-opacity", opacity); gradient.appendChild(stop); });
+        defs.appendChild(gradient); svg.appendChild(defs);
+        const left = 52, right = 775, top = 18, bottom = 218;
+        const maximum = Math.max(...rows.map((row) => Number(row[metric] || 0)), 1);
+        for (let step = 0; step <= 4; step++) {
+          const y = top + (bottom - top) * step / 4;
+          const line = document.createElementNS(svgNS, "line"); line.setAttribute("x1", left); line.setAttribute("x2", right); line.setAttribute("y1", y); line.setAttribute("y2", y); line.setAttribute("class", "grid-line"); svg.appendChild(line);
+          const label = document.createElementNS(svgNS, "text"); label.setAttribute("x", left - 10); label.setAttribute("y", y + 4); label.setAttribute("text-anchor", "end"); label.setAttribute("class", "axis-label"); label.textContent = format(maximum * (4 - step) / 4); svg.appendChild(label);
+        }
+        const timestamps = rows.map((row) => Date.parse(`${String(row.period).slice(0,10)}T00:00:00Z`));
+        const minTime = Math.min(...timestamps), maxTime = Math.max(...timestamps);
+        const points = rows.map((row, index) => {
+          const x = maxTime === minTime ? (left + right) / 2 : left + (right - left) * (timestamps[index] - minTime) / (maxTime - minTime);
+          const y = bottom - Number(row[metric] || 0) / maximum * (bottom - top);
+          return { x, y, row };
+        });
+        const area = document.createElementNS(svgNS, "path"); area.setAttribute("class", "trend-fill"); area.setAttribute("d", `M ${points[0].x} ${bottom} L ${points.map((point) => `${point.x} ${point.y}`).join(" L ")} L ${points[points.length - 1].x} ${bottom} Z`); svg.appendChild(area);
+        const line = document.createElementNS(svgNS, "polyline"); line.setAttribute("class", "trend-line"); line.setAttribute("points", points.map((point) => `${point.x},${point.y}`).join(" ")); svg.appendChild(line);
+        let lastLabelX = -Infinity;
+        points.forEach((point, index) => {
+          const circle = document.createElementNS(svgNS, "circle"); circle.setAttribute("class", "trend-point"); circle.setAttribute("cx", point.x); circle.setAttribute("cy", point.y); circle.setAttribute("r", "4");
+          const title = document.createElementNS(svgNS, "title"); title.textContent = `${point.row.period}：${exact.format(point.row[metric] || 0)} ${metric === "total_tokens" ? "Token" : "次调用"}`; circle.appendChild(title); svg.appendChild(circle);
+          const isLast = index === points.length - 1;
+          if (index === 0 || isLast || (rows.length <= 8 && point.x - lastLabelX >= 115 && (!isLast && points[points.length - 1].x - point.x >= 115))) {
+            const label = document.createElementNS(svgNS, "text"); label.setAttribute("x", point.x); label.setAttribute("y", 245); label.setAttribute("text-anchor", index === 0 ? "start" : index === points.length - 1 ? "end" : "middle"); label.setAttribute("class", "axis-label"); label.textContent = point.row.period; svg.appendChild(label);
+            lastLabelX = point.x;
+          }
+        });
+        container.appendChild(svg);
+      }
+
+      $("loginForm").addEventListener("submit", (event) => { event.preventDefault(); state.token = $("tokenInput").value.trim(); loadSummary(); });
+      $("refreshButton").addEventListener("click", loadSummary);
+      $("retryButton").addEventListener("click", loadSummary);
+      document.querySelectorAll(".nav-item").forEach((button) => button.addEventListener("click", () => setView(button.dataset.view)));
+      $("showAllModels").addEventListener("click", () => setView("models"));
+      document.querySelectorAll(".model-metric-tab").forEach((button) => button.addEventListener("click", () => {
+        state.modelMetric = button.dataset.modelMetric;
+        document.querySelectorAll(".model-metric-tab").forEach((item) => { const active = item.dataset.modelMetric === state.modelMetric; item.classList.toggle("active", active); item.setAttribute("aria-pressed", String(active)); });
+        if (state.data) renderModelUsageCharts();
+      }));
+      document.querySelectorAll(".metric-tab").forEach((button) => button.addEventListener("click", () => {
+        state.metric = button.dataset.metric;
+        document.querySelectorAll(".metric-tab").forEach((item) => { const active = item === button; item.classList.toggle("active", active); item.setAttribute("aria-pressed", String(active)); });
+        if (state.data) renderTrend();
+      }));
+      $("applyFilter").addEventListener("click", () => { clearActiveRange(); loadSummary(); });
+      $("clearFilter").addEventListener("click", () => { $("fromDay").value = ""; $("toDay").value = ""; clearActiveRange(); loadSummary(); });
+      document.querySelectorAll(".range-button").forEach((button) => button.addEventListener("click", () => applyQuickRange(button)));
+      $("logoutButton").addEventListener("click", () => { state.token = ""; state.data = null; $("login").classList.remove("hidden"); $("tokenInput").focus(); });
+      $("exportButton").addEventListener("click", () => {
+        if (!state.data) return;
+        const blob = new Blob([JSON.stringify(state.data, null, 2)], { type: "application/json" });
+        download(blob, `microglow-usage-${new Date().toISOString().slice(0, 10)}.json`);
+      });
+      $("csvButton").addEventListener("click", exportCsv);
+      $("printButton").addEventListener("click", () => window.print());
+      document.querySelectorAll(".tab").forEach((button) => button.addEventListener("click", () => {
+        state.period = button.dataset.period;
+        document.querySelectorAll(".tab").forEach((item) => { const active = item === button; item.classList.toggle("active", active); item.setAttribute("aria-selected", String(active)); });
+        if (state.data) renderTrend();
+      }));
+      document.querySelectorAll(".tab").forEach((button) => { button.setAttribute("role", "tab"); button.setAttribute("aria-selected", String(button.classList.contains("active"))); });
+      $("trendChart").setAttribute("role", "tabpanel");
+      document.querySelector(".tabs").addEventListener("keydown", (event) => {
+        if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+        const tabs = Array.from(document.querySelectorAll(".tab"));
+        const current = tabs.indexOf(document.activeElement);
+        if (current < 0) return;
+        event.preventDefault();
+        const next = tabs[(current + (event.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+        next.focus(); next.click();
+      });
+      setView("overview");
+      if (window.location.protocol === "file:") {
+        $("fileWarning").hidden = false;
+        $("tokenInput").disabled = true;
+        $("loginButton").disabled = true;
+        $("loginError").textContent = "请勿直接双击 admin.html。";
+      } else {
+        $("tokenInput").focus();
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+    admin off
+    log default {
+        output discard
+    }
+    servers :8443 {
+        trusted_proxies static {$TUNNEL_PEER_CIDR}
+        trusted_proxies_strict
+    }
+}
+
+https://{$PUBLIC_HOST:localhost}:8443 {
+    tls internal
+    request_body {
+        max_size 1MB
+    }
+    reverse_proxy telemetry-api:8000
+}
+
+https://{$ADMIN_HOST:localhost}:9443 {
+    tls internal
+    request_body {
+        max_size 64KB
+    }
+    reverse_proxy telemetry-admin:8001
+}

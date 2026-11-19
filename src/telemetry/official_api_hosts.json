@@ -1,0 +1,40 @@
+{
+  "verified_on": "2026-10-03",
+  "providers": [
+    {
+      "provider": "OpenAI",
+      "hosts": ["api.openai.com"],
+      "documentation": "https://platform.openai.com/docs/api-reference/responses"
+    },
+    {
+      "provider": "DeepSeek",
+      "hosts": ["api.deepseek.com"],
+      "documentation": "https://api-docs.deepseek.com/guides/responses_api/"
+    },
+    {
+      "provider": "Anthropic",
+      "hosts": ["api.anthropic.com"],
+      "documentation": "https://docs.anthropic.com/en/api/messages"
+    },
+    {
+      "provider": "智谱 AI",
+      "hosts": ["open.bigmodel.cn"],
+      "documentation": "https://docs.bigmodel.cn/api-reference/%E5%8A%A9%E7%90%86-api/%E5%8A%A9%E6%89%8B%E5%AF%B9%E8%AF%9D"
+    },
+    {
+      "provider": "Moonshot AI / Kimi",
+      "hosts": ["api.moonshot.cn", "api.moonshot.ai"],
+      "documentation": "https://www.kimi.com/help/kimi-api/api-troubleshooting"
+    },
+    {
+      "provider": "硅基流动",
+      "hosts": ["api.siliconflow.cn"],
+      "documentation": "https://docs.siliconflow.cn/docs/userguide/quickstart"
+    },
+    {
+      "provider": "硅基流动（海外端点）",
+      "hosts": ["api-st.siliconflow.cn"],
+      "documentation": "https://docs.siliconflow.cn/docs/release-notes/overview"
+    }
+  ]
+}

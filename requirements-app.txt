@@ -1,0 +1,6 @@
+# Runtime dependencies of the MicroGlow Relay Qt shell.
+httpx==0.28.1
+tomlkit==0.15.1
+PySide6==6.11.2
+# Build-time only dependency (kept separate from requirements.txt)
+# pyinstaller==6.22.3

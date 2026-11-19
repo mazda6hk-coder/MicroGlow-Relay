@@ -14,6 +14,8 @@ channel failover handled quietly.
 
 <img src="docs/images/social-preview-1280x640.png" alt="MicroGlow Relay — use third-party models in Codex and Claude Code" width="100%">
 
+<img src="docs/images/trip-token-loop.gif" alt="Trip Token meters rolling while the seasonal skins change" width="100%">
+
 ## Why Relay
 
 **Integration that stays out of the way.** One switch writes the Codex and
@@ -46,6 +48,14 @@ resets.
 
 Quit Relay from the tray menu (not by closing the window) so the client
 configuration is restored on exit.
+
+## Screenshots
+
+| Workbench (winter, day) | Models (spring, day) | Settings (winter, night) |
+|---|---|---|
+| ![Workbench](docs/images/screenshots/winter-day-01-dashboard.png) | ![Models](docs/images/screenshots/spring-day-02-models.png) | ![Settings](docs/images/screenshots/winter-night-05-settings.png) |
+
+All numbers, provider names and keys in these screenshots are demo data.
 
 ## How it works
 

@@ -13,6 +13,8 @@ Responses）与 Claude Code（Anthropic Messages）通过同一个本地入口�
 
 <img src="docs/images/social-preview-1280x640.png" alt="MicroGlow Relay — 把第三方模型，接进 Codex 与 Claude Code" width="100%">
 
+<img src="docs/images/trip-token-loop.gif" alt="Trip Token 里程表滚动，同时切换四季皮肤" width="100%">
+
 ## 为什么是 Relay
 
 **接入无感。** 一个开关替你写好 Codex 与 Claude Code 的配置，写前留备份，运行中
@@ -36,6 +38,14 @@ Responses）与 Claude Code（Anthropic Messages）通过同一个本地入口�
    Relay 会写好配置，客户端随即指向 `http://127.0.0.1:4141`。
 
 请从托盘菜单退出 Relay（关闭窗口不算退出），这样退出时才会恢复客户端配置。
+
+## 界面截图
+
+| 工作台（冬·昼） | 模型（春·昼） | 设置（冬·夜） |
+|---|---|---|
+| ![工作台](docs/images/screenshots/winter-day-01-dashboard.png) | ![模型](docs/images/screenshots/spring-day-02-models.png) | ![设置](docs/images/screenshots/winter-night-05-settings.png) |
+
+截图中的数字、供应商名与密钥均为演示数据。
 
 ## 工作原理
 

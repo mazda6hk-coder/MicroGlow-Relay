@@ -1,0 +1,21 @@
+{
+  "files": [
+    "winter-day-01-dashboard.png",
+    "winter-day-02-models.png",
+    "winter-day-03-usage.png",
+    "winter-day-04-trips.png",
+    "winter-day-05-settings.png",
+    "winter-night-01-dashboard.png",
+    "winter-night-02-models.png",
+    "winter-night-03-usage.png",
+    "winter-night-04-trips.png",
+    "winter-night-05-settings.png",
+    "spring-day-01-dashboard.png",
+    "spring-day-02-models.png",
+    "spring-day-03-usage.png",
+    "spring-day-04-trips.png",
+    "spring-day-05-settings.png"
+  ],
+  "size": "2010x1350",
+  "data": "isolated synthetic fixture; no real client configuration or upstream traffic"
+}

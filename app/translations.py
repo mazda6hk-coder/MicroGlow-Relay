@@ -3190,14 +3190,14 @@ for _code, _values in _LOGS_SETUP_TRANSLATIONS.items():
 
 # ---- 0.9 版式新增文案（工作台 Hero / Trip 单卡 / 模型渠道 / 日志三分类 / SETUP）
 _EXTRA = {
-    'API Key 使用 Windows DPAPI 加密，仅本机；请求与回复正文永不落盘。': {
-        'zh-TW': 'API Key 使用 Windows DPAPI 加密，僅本機；請求與回覆正文永不落盤。',
-        'en': 'API keys are encrypted with Windows DPAPI and stay on this device; request and reply bodies are never written to disk.',
-        'de': 'API-Schlüssel werden mit Windows DPAPI verschlüsselt und bleiben auf diesem Gerät; Anfrage- und Antworttexte werden nie gespeichert.',
-        'ja': 'APIキーはWindows DPAPIで暗号化され、この端末内にのみ保存されます。リクエストと応答の本文はディスクに保存されません。',
-        'ko': 'API 키는 Windows DPAPI로 암호화되어 이 기기에만 보관됩니다. 요청과 응답 본문은 디스크에 저장되지 않습니다.',
-        'es': 'Las claves API se cifran con Windows DPAPI y permanecen en este equipo; los cuerpos de solicitud y respuesta nunca se guardan en disco.',
-        'th': 'คีย์ API เข้ารหัสด้วย Windows DPAPI และเก็บไว้ในเครื่องนี้เท่านั้น เนื้อหาคำขอและการตอบกลับจะไม่ถูกบันทึกลงดิสก์',
+    'API Key 与本地令牌经 DPAPI 加密；正文不保存，推理摘要短期缓存。': {
+        'zh-TW': 'API Key 與本機權杖經 DPAPI 加密；正文不儲存，推理摘要短期快取。',
+        'en': 'API keys and the local token are DPAPI-encrypted; bodies are not stored, reasoning text is cached briefly.',
+        'de': 'API-Schlüssel und lokales Token sind DPAPI-verschlüsselt; Inhalte werden nicht gespeichert, Denktext kurz zwischengespeichert.',
+        'ja': 'APIキーとローカルトークンはDPAPIで暗号化。本文は保存せず、推論テキストは短期間キャッシュします。',
+        'ko': 'API 키와 로컬 토큰은 DPAPI로 암호화됩니다. 본문은 저장하지 않으며 추론 텍스트만 짧게 캐시합니다.',
+        'es': 'Las claves API y el token local usan DPAPI; los cuerpos no se guardan y el texto de razonamiento se cachea brevemente.',
+        'th': 'คีย์ API และโทเคนในเครื่องเข้ารหัสด้วย DPAPI ไม่บันทึกเนื้อหา แคชข้อความการคิดชั่วคราว',
     },
     'Codex CLI': {
         'zh-TW': 'Codex CLI',
@@ -4100,14 +4100,14 @@ for _text, _values in _EXTRA_3.items():
 
 # 0.9 UI 收口新增文案：八语言译文（人工校订）。
 _EXTRA_4 = {
-    'API Key 本机加密；请求与回复正文永不落盘。': {
-        'zh-TW': 'API Key 本機加密；請求與回覆正文永不寫入磁碟。',
-        'en': 'API keys are encrypted on this device; request and response bodies are never written to disk.',
-        'de': 'API-Schlüssel werden lokal verschlüsselt; Anfrage- und Antwortinhalte werden nie gespeichert.',
-        'ja': 'API Key は端末内で暗号化。リクエストと応答の本文は保存しません。',
-        'ko': 'API 키는 기기에서 암호화되며 요청·응답 본문은 저장하지 않습니다.',
-        'es': 'Las claves API se cifran en este equipo; los cuerpos de petición y respuesta nunca se guardan.',
-        'th': 'คีย์ API ถูกเข้ารหัสในเครื่อง ไม่บันทึกเนื้อหาคำขอและการตอบกลับ',
+    'API Key 与本地令牌经 DPAPI 加密；正文不保存，推理摘要短期缓存。': {
+        'zh-TW': 'API Key 與本機權杖經 DPAPI 加密；正文不儲存，推理摘要短期快取。',
+        'en': 'API keys and the local token are DPAPI-encrypted; bodies are not stored, reasoning text is cached briefly.',
+        'de': 'API-Schlüssel und lokales Token sind DPAPI-verschlüsselt; Inhalte werden nicht gespeichert, Denktext kurz zwischengespeichert.',
+        'ja': 'APIキーとローカルトークンはDPAPIで暗号化。本文は保存せず、推論テキストは短期間キャッシュします。',
+        'ko': 'API 키와 로컬 토큰은 DPAPI로 암호화됩니다. 본문은 저장하지 않으며 추론 텍스트만 짧게 캐시합니다.',
+        'es': 'Las claves API y el token local usan DPAPI; los cuerpos no se guardan y el texto de razonamiento se cachea brevemente.',
+        'th': 'คีย์ API และโทเคนในเครื่องเข้ารหัสด้วย DPAPI ไม่บันทึกเนื้อหา แคชข้อความการคิดชั่วคราว',
     },
     '{0} 个模型组 · {1} 个渠道': {
         'zh-TW': '{0} 個模型組 · {1} 個通路',

@@ -115,6 +115,9 @@ symbol names next to them are the stable anchors.
 | R67 | Core tests run headless; UI tests need a desktop session | Test run 2026-11-19: 219 core tests OK; full discover terminates in Qt under `QT_QPA_PLATFORM=offscreen` | Verified (run) |
 | R68 | Data directory `%LOCALAPPDATA%\MicroGlow Relay\data` (installed build) | `app/data_paths.py:26` | Verified |
 | R69 | Base URL for Claude Code entry has no `/v1` | `src/claude_config.py:10` (comment) and `:116` (`http://127.0.0.1:{port}`) | Verified |
+| R70 | The in-app privacy note now says: DPAPI encryption, bodies not stored, reasoning cached briefly | `app/final_views.py:908`; `app/final_translations.py:35` (all eight locales) | Verified |
+| R71 | Screenshots are real application renders with synthetic data | `tools/capture_ui_final.py:23` (`build_fixture` uses `fixture.invalid`, `synthetic-not-real-…`, no upstream calls); assets in `docs/images/screenshots/` | Verified (tool + provenance) |
+| R72 | The GIF and the 30-second video are rendered frame-by-frame from the real application, not mockups | `tools/capture_ui_final.py` (fixture + `Shell.grab()`); `capture_gif.py` / `capture_video.py` in the release kit; no simulated screens | Verified (method) |
 
 ## CHANGELOG
 
@@ -134,7 +137,7 @@ symbol names next to them are the stable anchors.
 
 | Original wording | Problem | Action |
 |---|---|---|
-| “请求与回复正文永不落盘” (old `README.md`, old UI text) | False as written: reasoning text is cached (`src/records.py:806`) and redacted upstream error excerpts are stored (`src/storage.py:498`). | Rewritten in README as “request and response bodies are not stored”, followed by explicit cache and error-excerpt disclosure. The diagram asset was cropped to remove that badge; the final diagram (G) will use the corrected wording. |
+| “请求与回复正文永不落盘” (old `README.md`, old UI text) | False as written: reasoning text is cached (`src/records.py:806`) and redacted upstream error excerpts are stored (`src/storage.py:498`). | Rewritten in README as “request and response bodies are not stored”, followed by explicit cache and error-excerpt disclosure. The diagram asset was cropped to remove that badge; **the in-app privacy note and all eight translations were corrected as well** (`app/final_views.py:908`, `app/final_translations.py:35`). |
 | “活动记录只保留状态、耗时和 Token 统计” (old README) | Understates stored fields (provider, model, status, channel index, cache/reasoning token counts, error excerpt). | Replaced with the full metadata list. |
 | “按用户安装到 `%LOCALAPPDATA%\Programs\...`” (old README) | Contradicts the installer (`{autopf}` + admin). | Corrected to `C:\Program Files\MicroGlow Relay`. |
 | “自动检查更新…本轮未实现” (old README) | Contradicts `app/update_controller.py` and `app/updates.py`; the privacy policy already describes auto-update. | Replaced with the implemented behavior and explicit default-on disclosure. |

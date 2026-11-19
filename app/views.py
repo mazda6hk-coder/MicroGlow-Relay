@@ -3405,7 +3405,7 @@ class SettingsPage(Page):
         self.telemetry_upload_button = compact_button(tr("查看将上传的内容"))
         self.telemetry_upload_button.clicked.connect(self.open_statistics_details)
         card.body.addWidget(self.telemetry_upload_button, 0, Qt.AlignLeft)
-        dpapi = QLabel(tr("API Key 与本地令牌经 DPAPI 加密；正文不保存，推理摘要短期缓存。"))
+        dpapi = QLabel(tr("API Key 与本地令牌经 DPAPI 加密；正文不保存，推理文本短期缓存。"))
         dpapi.setWordWrap(True)
         dpapi.setStyleSheet(f"font-size: 10.5px; color: {palette.muted};")
         card.body.addWidget(dpapi)

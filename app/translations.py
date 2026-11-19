@@ -3190,8 +3190,8 @@ for _code, _values in _LOGS_SETUP_TRANSLATIONS.items():
 
 # ---- 0.9 版式新增文案（工作台 Hero / Trip 单卡 / 模型渠道 / 日志三分类 / SETUP）
 _EXTRA = {
-    'API Key 与本地令牌经 DPAPI 加密；正文不保存，推理摘要短期缓存。': {
-        'zh-TW': 'API Key 與本機權杖經 DPAPI 加密；正文不儲存，推理摘要短期快取。',
+    'API Key 与本地令牌经 DPAPI 加密；正文不保存，推理文本短期缓存。': {
+        'zh-TW': 'API Key 與本機權杖經 DPAPI 加密；正文不儲存，推理文本短期快取。',
         'en': 'API keys and the local token are DPAPI-encrypted; bodies are not stored, reasoning text is cached briefly.',
         'de': 'API-Schlüssel und lokales Token sind DPAPI-verschlüsselt; Inhalte werden nicht gespeichert, Denktext kurz zwischengespeichert.',
         'ja': 'APIキーとローカルトークンはDPAPIで暗号化。本文は保存せず、推論テキストは短期間キャッシュします。',
@@ -4100,8 +4100,8 @@ for _text, _values in _EXTRA_3.items():
 
 # 0.9 UI 收口新增文案：八语言译文（人工校订）。
 _EXTRA_4 = {
-    'API Key 与本地令牌经 DPAPI 加密；正文不保存，推理摘要短期缓存。': {
-        'zh-TW': 'API Key 與本機權杖經 DPAPI 加密；正文不儲存，推理摘要短期快取。',
+    'API Key 与本地令牌经 DPAPI 加密；正文不保存，推理文本短期缓存。': {
+        'zh-TW': 'API Key 與本機權杖經 DPAPI 加密；正文不儲存，推理文本短期快取。',
         'en': 'API keys and the local token are DPAPI-encrypted; bodies are not stored, reasoning text is cached briefly.',
         'de': 'API-Schlüssel und lokales Token sind DPAPI-verschlüsselt; Inhalte werden nicht gespeichert, Denktext kurz zwischengespeichert.',
         'ja': 'APIキーとローカルトークンはDPAPIで暗号化。本文は保存せず、推論テキストは短期間キャッシュします。',

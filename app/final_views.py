@@ -905,7 +905,7 @@ class SettingsPage(existing.SettingsPage):
         self.telemetry_preview.setStyleSheet(f"font-family: '{theme.FONT_FAMILY}'; font-size: 12px; color: {theme.current.ink}; background: {theme.current.paper}; border: 1px solid {theme.current.line}; border-radius: 9px; padding: 10px;")
         self.telemetry_upload_button = button(privacy, tr("查看将上传的内容"), (22, 303, 356, 26), self.open_statistics_details)
         line(privacy, (22, 341, 356, 1))
-        note = label(privacy, tr("API Key 与本地令牌经 DPAPI 加密；正文不保存，推理摘要短期缓存。"), (22, 353, 356, 54), 13, muted=True)
+        note = label(privacy, tr("API Key 与本地令牌经 DPAPI 加密；正文不保存，推理文本短期缓存。"), (22, 353, 356, 54), 13, muted=True)
         note.setWordWrap(True)
         data = card(self, (910, 566, 400, 132))
         label(data, tr("数据位置"), (22, 16, 356, 32), 17, serif=True, bold=True)

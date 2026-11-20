@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mazda6hk-coder.github.io/MicroGlow-Relay/sitemap.xml

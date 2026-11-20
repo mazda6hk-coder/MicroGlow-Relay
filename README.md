@@ -36,6 +36,20 @@ is scoped to All / Codex / Claude, can be named, can be reset with a 10-second
 undo, and is written to a trip ledger when reset. The total odometer never
 resets.
 
+## Install
+
+Download the installer from the
+[Releases page](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.0),
+or install it with the Windows Package Manager:
+
+```powershell
+winget install MicroGlow.MicroGlowRelay
+```
+
+The installer is not code-signed, so Windows may show a SmartScreen prompt.
+Verify the download against
+[SHA256SUMS.txt](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/download/v1.0/SHA256SUMS.txt).
+
 ## Quick start
 
 1. **Install and start Relay.** The Windows installer installs to

@@ -30,6 +30,19 @@ Responses）与 Claude Code（Anthropic Messages）通过同一个本地入口�
 **Trip Token。** 两段独立小计，像汽车上的行程 A / B。每段可选全局、Codex 或 Claude
 口径，可命名，清零后 10 秒内可撤销；清零时自动写入行程记录。总里程永不清零。
 
+## 安装
+
+从 [Releases 页面](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.0)
+下载安装包，或用 Windows 包管理器安装：
+
+```powershell
+winget install MicroGlow.MicroGlowRelay
+```
+
+安装包未做代码签名，Windows 可能显示 SmartScreen 提示。请用
+[SHA256SUMS.txt](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/download/v1.0/SHA256SUMS.txt)
+核对校验值。
+
 ## 三步上手
 
 1. **安装并启动 Relay。** Windows 安装包安装到 `C:\Program Files\MicroGlow Relay`，

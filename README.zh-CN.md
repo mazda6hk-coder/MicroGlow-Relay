@@ -2,6 +2,8 @@
 
 **把第三方模型，接进 Codex 与 Claude Code。**
 
+文档站：https://mazda6hk-coder.github.io/MicroGlow-Relay/
+
 面向 Windows 的本地 AI 模型网关。Relay 监听 `127.0.0.1:4141`，让 Codex（OpenAI
 Responses）与 Claude Code（Anthropic Messages）通过同一个本地入口使用第三方模型：
 协议保真，重试与渠道切换在背后处理，不打扰正在进行的工作。

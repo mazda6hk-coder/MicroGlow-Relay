@@ -2,6 +2,8 @@
 
 **Use third-party models in Codex and Claude Code.**
 
+Documentation site: https://mazda6hk-coder.github.io/MicroGlow-Relay/
+
 A local AI model gateway for Windows. Relay listens on `127.0.0.1:4141` and lets
 Codex (OpenAI Responses) and Claude Code (Anthropic Messages) reach third-party
 model providers through one local endpoint — protocol-faithful, with retries and

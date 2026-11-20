@@ -4,6 +4,11 @@
 
 Documentation site: https://mazda6hk-coder.github.io/MicroGlow-Relay/
 
+**[**Download Relay 1.0 for Windows**](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.0)
+· [Source](#from-source) · [Docs](https://mazda6hk-coder.github.io/MicroGlow-Relay/)**
+<sub>Unsigned installer: Windows may show a SmartScreen warning. Verify the SHA-256 on the
+[release page](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.0).</sub>
+
 A local AI model gateway for Windows. Relay listens on `127.0.0.1:4141` and lets
 Codex (OpenAI Responses) and Claude Code (Anthropic Messages) reach third-party
 model providers through one local endpoint — protocol-faithful, with retries and
@@ -241,6 +246,16 @@ Planned, not released. Listed here so that nobody mistakes a plan for a feature:
 MicroGlow Relay is independent and is not affiliated with, endorsed by, or
 sponsored by OpenAI or Anthropic. "Codex" and "Claude Code" are used only to
 describe client compatibility; no official logos are used.
+
+## Support this project
+
+If Relay is useful to you, a star helps other developers find it. For anything
+that does not work, [open an issue](https://github.com/mazda6hk-coder/MicroGlow-Relay/issues)
+— bug reports and questions are both welcome. Please remove API keys and
+conversation content from anything you paste.
+
+Questions about privacy, or a vulnerability you found, please use the addresses
+in [SECURITY.md](SECURITY.md) and the [privacy policy](docs/PRIVACY-POLICY.md).
 
 ## Contact
 

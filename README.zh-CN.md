@@ -4,6 +4,11 @@
 
 文档站：https://mazda6hk-coder.github.io/MicroGlow-Relay/
 
+**[**下载 Relay 1.0（Windows）**](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.0)
+· [源码](#从源码构建) · [文档](https://mazda6hk-coder.github.io/MicroGlow-Relay/)**
+<sub>安装包未签名：Windows 可能出现 SmartScreen 提示，请到
+[发布页](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.0)核对 SHA-256。</sub>
+
 面向 Windows 的本地 AI 模型网关。Relay 监听 `127.0.0.1:4141`，让 Codex（OpenAI
 Responses）与 Claude Code（Anthropic Messages）通过同一个本地入口使用第三方模型：
 协议保真，重试与渠道切换在背后处理，不打扰正在进行的工作。
@@ -204,6 +209,15 @@ Relay 本身没有账号。它连接你配置的接口，使用这些服务仍�
 
 MicroGlow Relay 是独立项目，与 OpenAI、Anthropic 无隶属、背书或赞助关系。
 "Codex" 与 "Claude Code" 仅用于说明客户端兼容性，未使用其官方 Logo。
+
+## 支持这个项目
+
+如果 Relay 对你有用，点个 Star 能让更多开发者找到它。哪里不好用，
+[开个 issue](https://github.com/mazda6hk-coder/MicroGlow-Relay/issues) 即可，
+缺陷和提问都欢迎。贴内容前请删掉 API Key 和对话正文。
+
+隐私相关问题，以及发现的安全漏洞，请按 [SECURITY.md](SECURITY.md) 与
+[隐私政策](docs/PRIVACY-POLICY.md) 里的方式联系。
 
 ## 联系方式
 

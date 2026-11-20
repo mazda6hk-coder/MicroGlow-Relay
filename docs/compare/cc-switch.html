@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MicroGlow Relay vs. cc-switch — which one fits your workflow</title>
+<meta name="description" content="A factual comparison between a configuration switcher (cc-switch) and a local gateway (MicroGlow Relay) for Codex and Claude Code.">
+<link rel="canonical" href="https://mazda6hk-coder.github.io/MicroGlow-Relay/compare/cc-switch.html">
+<link rel="stylesheet" href="../site.css">
+</head>
+<body>
+<header class="site"><div class="wrap">
+  <div class="brand">Micro<span>Glow</span> Relay</div>
+  <nav><a href="../index.html">Home</a><a href="../alternatives.html">Alternatives</a>
+  <a href="https://github.com/mazda6hk-coder/MicroGlow-Relay">GitHub</a></nav>
+</div></header>
+<main class="wrap">
+<h1>Relay vs. cc-switch</h1>
+<p class="lead">They solve adjacent problems. One switches which configuration a client reads;
+the other runs a local service that the client talks to. Choosing depends on whether you want to
+manage configurations or manage traffic.</p>
+
+<div class="card">
+<table>
+<thead><tr><th>&nbsp;</th><th>cc-switch</th><th>MicroGlow Relay</th></tr></thead>
+<tbody>
+<tr><td>Shape</td><td>Desktop configuration switcher</td><td>Local gateway on <code>127.0.0.1:4141</code></td></tr>
+<tr><td>What changes</td><td>Which provider configuration the client reads</td><td>Nothing in the client beyond one endpoint and token</td></tr>
+<tr><td>Switching providers</td><td>Switch the active configuration</td><td>Switch models or channels inside Relay; the client stays pointed at Relay</td></tr>
+<tr><td>Failover</td><td>Not its main job; you switch</td><td>Weighted channels, 60-second cooldown, failover before the response starts</td></tr>
+<tr><td>Usage metering</td><td>—</td><td>Trip Token: two subtotals, scope per client, undoable reset, ledger</td></tr>
+<tr><td>Interface</td><td>Utility-first</td><td>Seasonal and day/night skins; eight interface languages</td></tr>
+</tbody>
+</table>
+<p class="note">Descriptions reflect each project's public positioning as of late 2026 and the category
+they occupy; details change over time. Check each project's own documentation before deciding.</p>
+</div>
+
+<h2>Choose cc-switch if…</h2>
+<ul class="tight">
+  <li>you only need to switch between provider configurations, and a restart is acceptable;</li>
+  <li>you do not want a background service running;</li>
+  <li>your workflow is "one provider at a time".</li>
+</ul>
+
+<h2>Choose Relay if…</h2>
+<ul class="tight">
+  <li>you want both Codex and Claude Code pointed at one local endpoint at the same time;</li>
+  <li>you want retries and channel failover handled before the response starts;</li>
+  <li>you want per-session token accounting with a reset you can undo;</li>
+  <li>you care what the tool looks like while you use it.</li>
+</ul>
+
+<p><a class="btn" href="https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.0">Download Relay</a>
+<a class="btn ghost" href="../alternatives.html">See all alternatives</a></p>
+<p class="note">Relay's own documentation: <a href="https://github.com/mazda6hk-coder/MicroGlow-Relay">README</a>.
+Independent project; not affiliated with cc-switch or with OpenAI/Anthropic.</p>
+</main>
+<footer><div class="wrap">MicroGlow Relay · <a href="https://www.microglow.com.cn/relay">Official site</a> ·
+<a href="https://github.com/mazda6hk-coder/MicroGlow-Relay">GitHub</a></footer></div>
+</body>
+</html>

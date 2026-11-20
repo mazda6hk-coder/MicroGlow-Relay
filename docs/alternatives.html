@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Alternatives to MicroGlow Relay — local gateways, routers and config switchers</title>
+<meta name="description" content="If Relay is not the right fit, here are the categories of tools people use instead: config switchers, local proxies and model routers.">
+<link rel="canonical" href="https://mazda6hk-coder.github.io/MicroGlow-Relay/alternatives.html">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<header class="site"><div class="wrap">
+  <div class="brand">Micro<span>Glow</span> Relay</div>
+  <nav><a href="index.html">Home</a><a href="compare/cc-switch.html">vs. cc-switch</a>
+  <a href="https://github.com/mazda6hk-coder/MicroGlow-Relay">GitHub</a></nav>
+</div></header>
+<main class="wrap">
+<h1>Alternatives to Relay</h1>
+<p class="lead">The right tool depends on what you actually need. This page groups the categories
+rather than ranking products, because a switcher and a gateway are not substitutes.</p>
+
+<div class="card">
+<h2>1. Configuration switchers</h2>
+<p>These manage which provider configuration your client reads. They are the lightest option and
+usually require no background service. <strong>cc-switch</strong> is the best-known example in this
+category.</p>
+<p><strong>Choose this if</strong> you switch providers occasionally and a restart is fine.</p>
+</div>
+
+<div class="card">
+<h2>2. Local proxies and routers</h2>
+<p>These run a local endpoint and forward requests, sometimes with model routing, logging or
+multi-provider aggregation. Examples include <strong>CLIProxyAPI</strong>,
+<strong>claude-code-router</strong> and general-purpose proxies such as <strong>LiteLLM</strong>.</p>
+<p><strong>Choose this if</strong> you want one endpoint, routing or aggregation, and are comfortable
+configuring a service.</p>
+</div>
+
+<div class="card">
+<h2>3. Managed gateways</h2>
+<p>Hosted services such as <strong>OpenRouter</strong> give you one API key across many models.
+They are convenient, but your traffic leaves your machine and is subject to that service's terms.</p>
+<p><strong>Choose this if</strong> you prefer a hosted service over running something locally.</p>
+</div>
+
+<div class="card">
+<h2>4. Relay</h2>
+<p>MicroGlow Relay runs locally, speaks both inbound protocols (OpenAI Responses and Anthropic
+Messages), keeps both clients pointed at one endpoint, and handles retries and channel failover
+before the response starts. It also meters token usage with two resettable trip subtotals and treats
+the interface as part of the product.</p>
+<p><strong>Choose Relay if</strong> you want the local-gateway benefits plus visible usage accounting
+and a desktop experience you do not mind looking at.</p>
+<p><a class="btn" href="https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.0">Download Relay</a></p>
+</div>
+
+<p class="note">Product names are trademarks of their respective owners and are used here only to
+describe categories. This page is not affiliated with those projects. Check each project's own
+documentation for current capabilities.</p>
+</main>
+<footer><div class="wrap">MicroGlow Relay · <a href="https://www.microglow.com.cn/relay">Official site</a> ·
+<a href="https://github.com/mazda6hk-coder/MicroGlow-Relay">GitHub</a></div></footer>
+</body>
+</html>

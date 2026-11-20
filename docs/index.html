@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MicroGlow Relay — use third-party models in Codex and Claude Code</title>
+<meta name="description" content="MicroGlow Relay is a local gateway for Windows that lets Codex and Claude Code use third-party models. Open source, Apache-2.0.">
+<link rel="canonical" href="https://mazda6hk-coder.github.io/MicroGlow-Relay/">
+<meta property="og:title" content="MicroGlow Relay — local gateway for Codex and Claude Code">
+<meta property="og:description" content="Use third-party models in Codex and Claude Code. Local, open source, no account.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="images/social-preview-1280x640.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="site.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication",
+"name":"MicroGlow Relay","applicationCategory":"DeveloperApplication",
+"operatingSystem":"Windows","license":"https://www.apache.org/licenses/LICENSE-2.0",
+"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
+"url":"https://mazda6hk-coder.github.io/MicroGlow-Relay/",
+"sameAs":["https://github.com/mazda6hk-coder/MicroGlow-Relay"]}
+</script>
+</head>
+<body>
+<header class="site"><div class="wrap">
+  <div class="brand">Micro<span>Glow</span> Relay</div>
+  <nav>
+    <a href="compare/cc-switch.html">Compare</a>
+    <a href="alternatives.html">Alternatives</a>
+    <a href="claude-code-third-party.html">Claude Code guide</a>
+    <a href="https://github.com/mazda6hk-coder/MicroGlow-Relay">GitHub</a>
+  </nav>
+</div></header>
+
+<main class="wrap">
+<h1>Use third-party models in Codex and Claude Code.</h1>
+<p class="lead">A local gateway for Windows. Relay listens on <code>127.0.0.1:4141</code> and lets
+Codex (OpenAI Responses) and Claude Code (Anthropic Messages) reach third-party model
+providers through one endpoint.</p>
+
+<p>
+  <a class="btn" href="https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.0">Download for Windows</a>
+  <a class="btn ghost" href="https://github.com/mazda6hk-coder/MicroGlow-Relay">Source on GitHub</a>
+</p>
+<p class="note">Windows x64. The installer is not code-signed; Windows may show a SmartScreen warning.
+Verify the SHA-256 published with the release.</p>
+
+<img class="shot" src="images/trip-token-loop.gif" alt="Trip Token meters rolling while the seasonal skins change">
+
+<h2>Three things it does differently</h2>
+<div class="grid">
+  <div class="card"><h3>Seasonal skins</h3><p>Spring, summer, autumn and winter, each with a day and
+  a night palette. This category is mostly grey tables; Relay treats the interface as part of the tool.</p></div>
+  <div class="card"><h3>Trip Token</h3><p>Two independent subtotals, like the trip meters in a car.
+  Reset is undoable for ten seconds, a reset writes a ledger entry, and the total never resets.</p></div>
+  <div class="card"><h3>A different desktop experience</h3><p>A quiet interface with eight interface
+  languages, built for people who spend the day in a terminal.</p></div>
+</div>
+
+<h2>Privacy, stated plainly</h2>
+<div class="card">
+  <ul class="tight">
+    <li>No account. Keys and the local token are encrypted with Windows DPAPI inside Relay's own settings.</li>
+    <li>Request and response bodies are not stored. Reasoning text is cached locally for up to 7 days.</li>
+    <li>Upstream errors are redacted and truncated to 800 characters in the local log.</li>
+    <li>Anonymous statistics are opt-in and off by default. Update checks are on by default, once per day.</li>
+  </ul>
+  <p class="note"><a href="https://github.com/mazda6hk-coder/MicroGlow-Relay/blob/main/docs/PRIVACY-POLICY.md">Privacy policy</a> ·
+  <a href="https://github.com/mazda6hk-coder/MicroGlow-Relay/blob/main/docs/USER-AGREEMENT.md">User agreement</a></p>
+</div>
+
+<h2>Compare and alternatives</h2>
+<p>If you are choosing between a config switcher and a local gateway, start here:
+<a href="compare/cc-switch.html">Relay vs. cc-switch</a> and
+<a href="alternatives.html">alternatives to Relay</a>.</p>
+
+<p class="note">This is the project's public documentation page. It is independent and is not affiliated
+with, endorsed by, or sponsored by OpenAI or Anthropic. "Codex" and "Claude Code" describe client
+compatibility only.</p>
+</main>
+
+<footer><div class="wrap">
+  MicroGlow Relay · Apache-2.0 code · <a href="https://www.microglow.com.cn/relay">Official site</a> ·
+  <a href="https://github.com/mazda6hk-coder/MicroGlow-Relay">GitHub</a> ·
+  <a href="mailto:support@microglow.com.cn">support@microglow.com.cn</a>
+</div></footer>
+</body>
+</html>

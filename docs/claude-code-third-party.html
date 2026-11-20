@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Use Claude Code with third-party models — a local gateway setup</title>
+<meta name="description" content="How Claude Code's base URL and token settings work, and how a local gateway lets you point Claude Code at third-party model providers.">
+<link rel="canonical" href="https://mazda6hk-coder.github.io/MicroGlow-Relay/claude-code-third-party.html">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<header class="site"><div class="wrap">
+  <div class="brand">Micro<span>Glow</span> Relay</div>
+  <nav><a href="index.html">Home</a><a href="alternatives.html">Alternatives</a>
+  <a href="https://github.com/mazda6hk-coder/MicroGlow-Relay">GitHub</a></nav>
+</div></header>
+<main class="wrap">
+<h1>Claude Code with third-party models</h1>
+<p class="lead">Claude Code talks to an Anthropic-compatible endpoint. If you run a local gateway
+that speaks the same protocol, you can point Claude Code at it and choose the upstream behind it.</p>
+
+<h2>How the client is configured</h2>
+<div class="card">
+<p>Claude Code reads <code>~/.claude/settings.json</code>. Two fields matter:</p>
+<ul class="tight">
+  <li><code>env.ANTHROPIC_BASE_URL</code> — the host root, <strong>without</strong> <code>/v1</code>.
+  Claude Code appends the path itself.</li>
+  <li><code>env.ANTHROPIC_AUTH_TOKEN</code> — the token the endpoint expects.</li>
+</ul>
+<p class="note">These are the client's own configuration fields. Your use of any model provider
+remains subject to that provider's terms.</p>
+</div>
+
+<h2>With Relay</h2>
+<div class="card">
+<ol>
+  <li>Install and start Relay. It listens on <code>127.0.0.1:4141</code>.</li>
+  <li>In Relay, add a provider and one or more models on the <strong>Models</strong> page.</li>
+  <li>On the <strong>Clients / Setup</strong> page, enable Claude Code. Relay writes
+  <code>ANTHROPIC_BASE_URL</code> and the local token into <code>settings.json</code>, keeping a
+  backup and detecting changes made outside Relay.</li>
+  <li>Restart Claude Code. Quit Relay from the tray when you are done so the configuration is restored.</li>
+</ol>
+<p>The same switch also handles Codex, which uses <code>~/.codex/config.toml</code> and OpenAI
+Responses. Both clients can be pointed at Relay at the same time.</p>
+<p><a class="btn" href="https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.0">Download Relay</a>
+<a class="btn ghost" href="https://github.com/mazda6hk-coder/MicroGlow-Relay/blob/main/docs/USER-GUIDE.md">User guide</a></p>
+</div>
+
+<h2>Doing it by hand</h2>
+<div class="card">
+<p>If you prefer not to run a gateway, you can edit <code>settings.json</code> yourself and point
+<code>ANTHROPIC_BASE_URL</code> directly at a provider that offers an Anthropic-compatible endpoint.
+You are responsible for checking that the provider supports the Messages API, tool use and the
+features you rely on.</p>
+</div>
+
+<p class="note">Relay is an independent project, not affiliated with Anthropic. "Claude Code" is used
+only to describe client compatibility.</p>
+</main>
+<footer><div class="wrap">MicroGlow Relay · <a href="https://www.microglow.com.cn/relay">Official site</a> ·
+<a href="https://github.com/mazda6hk-coder/MicroGlow-Relay">GitHub</a></div></footer>
+</body>
+</html>

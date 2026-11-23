@@ -4,10 +4,10 @@
 
 文档站：https://mazda6hk-coder.github.io/MicroGlow-Relay/
 
-**[**下载 Relay 1.0（Windows）**](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.0)
+**[**下载 Relay 1.3（Windows）**](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.3)
 · [源码](#从源码构建) · [文档](https://mazda6hk-coder.github.io/MicroGlow-Relay/)**
 <sub>安装包未签名：Windows 可能出现 SmartScreen 提示，请到
-[发布页](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.0)核对 SHA-256。</sub>
+[发布页](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.3)核对 SHA-256。</sub>
 
 面向 Windows 的本地 AI 模型网关。Relay 监听 `127.0.0.1:4141`，让 Codex（OpenAI
 Responses）与 Claude Code（Anthropic Messages）通过同一个本地入口使用第三方模型：
@@ -16,7 +16,7 @@ Responses）与 Claude Code（Anthropic Messages）通过同一个本地入口�
 [![平台](https://img.shields.io/badge/platform-Windows%20x64-4a5a68?style=flat-square)](#平台与要求)
 [![许可证](https://img.shields.io/badge/license-Apache--2.0-4a5a68?style=flat-square)](LICENSE)
 [![语言](https://img.shields.io/badge/interface-8%20languages-4a5a68?style=flat-square)](#界面)
-[![版本](https://img.shields.io/badge/version-1.0-4a5a68?style=flat-square)](CHANGELOG.md)
+[![版本](https://img.shields.io/badge/version-1.3-4a5a68?style=flat-square)](CHANGELOG.md)
 
 <img src="docs/images/social-preview-1280x640.png" alt="MicroGlow Relay — 把第三方模型，接进 Codex 与 Claude Code" width="100%">
 
@@ -37,7 +37,7 @@ Responses）与 Claude Code（Anthropic Messages）通过同一个本地入口�
 
 ## 安装
 
-从 [Releases 页面](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.0)
+从 [Releases 页面](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.3)
 下载安装包，或用 Windows 包管理器安装：
 
 ```powershell
@@ -45,7 +45,7 @@ winget install MicroGlow.MicroGlowRelay
 ```
 
 安装包未做代码签名，Windows 可能显示 SmartScreen 提示。请用
-[SHA256SUMS.txt](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/download/v1.0/SHA256SUMS.txt)
+[SHA256SUMS.txt](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/download/v1.3/SHA256SUMS.txt)
 核对校验值。
 
 ## 三步上手
@@ -139,7 +139,9 @@ winget install MicroGlow.MicroGlowRelay
 - **8 种界面语言：** 简体中文、繁體中文、English、Deutsch、日本語、ไทย、Español、
   한국어。安装向导本身只有英文与简体中文。
 - **8 组皮肤：** 春、夏、秋、冬 × 昼夜。默认春·昼。
-- **本版本不支持 Linux。**
+- **Linux（预览版）。** 每个 Release 同时提供 `.deb` 与独立 ELF 构建。它们是预览版：
+  尚未完成与 Windows 同等的回归测试，且需要解锁系统密钥库（Secret Service）才能保存
+  API Key。本仓库发布的源码是 Windows 应用；Linux 构建来自另一份尚未公开的源码树。
 
 ## 从源码构建 {#从源码构建}
 
@@ -188,7 +190,8 @@ Relay 本身没有账号。它连接你配置的接口，使用这些服务仍�
 尚未代码签名。请核对发布的校验值。
 
 **支持 Linux 吗？**
-本版本不支持。
+每个 Release 提供预览版 `.deb` 与 ELF 构建，但尚未达到 Windows 的回归标准，
+且需要解锁 Secret Service 密钥库。此处公开的是 Windows 源码，Linux 源码树尚未进入本仓库。
 
 ## 路线图
 

@@ -3,6 +3,64 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.3] - 2026-11-23
+
+Native model passthrough. When no configured profile matches a native Codex
+model name, Relay forwards the request to Codex's own official backend
+(`chatgpt.com/backend-api/codex/responses`), authenticating with the ChatGPT
+login already present in `~/.codex/auth.json`.
+
+### Added
+
+- Native passthrough: a session can use a native model as the orchestrator and
+  third-party models for worker turns, without quitting Relay or editing config.
+- Reasoning chains stay intact for native turns: `encrypted_content` round-trips
+  because the same account produces and consumes it.
+- Native catalog snapshot (`src/native_catalog.json.gz`, 11 entries) captured from
+  `codex debug models --bundled`, so instruction layer and reasoning levels match
+  what Codex itself ships. Refresh with `tools/capture_native_catalog.py`.
+
+### Changed
+
+- Native entries with no usable path are no longer exported to the model catalog.
+- A ChatGPT backend `200` without `Content-Type` is now treated as a healthy
+  stream instead of being misread as `502 not_sse`.
+- Native 401/403 messages now say the Codex login expired or the plan does not
+  include the model, instead of pointing at API-key configuration.
+
+### Security
+
+- `~/.codex/auth.json` is read on every native request and never written back.
+- The native token is applied only in the passthrough branch. Requests to
+  third-party providers never receive it; forwarded client headers come from a
+  fixed allowlist that excludes `Authorization`.
+
+## [1.2] - 2026-11-22
+
+### Changed
+
+- Model catalog is grouped by provider: entries from one provider are contiguous,
+  sorted by model name, and provider blocks follow first-appearance order.
+- Unified naming: `Provider｜Model` (previously `Provider · Model`); native models
+  use `Native｜`.
+- Removed the global "follow Relay" catalog entry. Models are chosen per session;
+  the exported default model falls back to the currently selected profile, then
+  the first available one.
+- Native models merged into the same list, re-checked against
+  `codex debug models --bundled` (11 entries, including GPT-6.2 / GPT-6.1 / GPT-6
+  families).
+- Restored the feedback entry (mailto) in the About card.
+
+## [1.1] - 2026-11-21
+
+### Fixed
+
+- Tool-shape compatibility in three layers before reaching upstream: known
+  rewrites (`custom`/freeform to function, collapse top-level `oneOf`/`anyOf`,
+  fill missing `parameters`), a fallback that drops unknown private carriers, and
+  one reactive retry when an upstream 400/422 points at tool fields.
+- Window masking on borderless frames.
+
 ## [1.0] - 2026-11-19
 
 First public source release. The Windows build was previously distributed as a
@@ -52,3 +110,7 @@ binary only; this release publishes the source, documentation and license files.
 - Cross-model session continuation is planned, not implemented.
 
 [1.0]: https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.0
+
+[1.3]: https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.3
+[1.2]: https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.2
+[1.1]: https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.1

@@ -96,7 +96,7 @@ class GatewayFriendlyNameTests(unittest.TestCase):
 
     def test_catalog_slug_matches_what_claude_users_type(self):
         """Codex 目录里的 slug 与 Claude /model 可输入的友好名是同一个字符串。"""
-        entry = model_catalog(self.settings)["models"][1]
+        entry = model_catalog(self.settings)["models"][0]
         self.assertEqual(entry["slug"], "demo-model")
         self.assertEqual(entry["slug"], friendly_slug(
             self.settings.profiles()[0], self.settings.profiles()))

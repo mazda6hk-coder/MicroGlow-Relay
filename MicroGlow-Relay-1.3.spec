@@ -1,5 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
-"""PyInstaller recipe for MicroGlow Relay 1.0 (Windows).
+"""PyInstaller recipe for MicroGlow Relay 1.3 (Windows).
 
 Slim build: only QtCore/QtGui/QtWidgets/QtSvg are imported by the app;
 everything else in the Qt distribution is excluded up front.
@@ -44,14 +44,16 @@ a = Analysis(
              for key in ("springmagnolia", "mistblue", "graphite", "microglow", "nightfall",
                          "goldglow", "moonwhite", "starpark")],
            (str(ROOT / "docs" / "USER-GUIDE.md"), "docs"),
-           (str(ROOT / "docs" / "help"), "docs/help"),
            (str(ROOT / "docs" / "USER-AGREEMENT.md"), "docs"),
            (str(ROOT / "docs" / "PRIVACY-POLICY.md"), "docs"),
            (str(ROOT / "docs" / "THIRD-PARTY-NOTICES.md"), "docs"),
            (str(ROOT / "docs" / "licenses"), "docs/licenses"),
            (str(ROOT / "assets" / "microglow-icon-idle.png"), "assets"),
            (str(ROOT / "assets" / "microglow-icon-transfer.png"), "assets"),
-           (str(ROOT / "src" / "telemetry" / "official_api_hosts.json"), "telemetry")],
+           (str(ROOT / "src" / "telemetry" / "official_api_hosts.json"), "telemetry"),
+           # 原生直通用的完整目录快照（含系统提示词）；刻意不进 PYZ，
+           # 由 native_models.native_catalog() 按 _MEIPASS 读取。
+           (str(ROOT / "src" / "native_catalog.json.gz"), ".")],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -74,7 +76,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name="MicroGlow-Relay-1.0",
+    name="MicroGlow-Relay-1.3",
     debug=False,
     bootloader_ignore_signals=False,
     strip=True,
@@ -87,6 +89,6 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    version=str(ROOT / "tools" / "windows_version_1_0.py"),
+    version=str(ROOT / "tools" / "windows_version_1_3.py"),
     icon=[str(ROOT / "assets" / "app.ico")],
 )

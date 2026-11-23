@@ -13,12 +13,12 @@ import time
 from datetime import date, datetime
 from pathlib import Path
 
-from PySide6.QtCore import QDate, QPointF, QRectF, QSize, Qt, QTimer, QUrl
-from PySide6.QtGui import QColor, QDesktopServices, QFont, QPainter, QPen
+from PySide6.QtCore import QDate, QPointF, QRect, QRectF, QSize, Qt, QTimer, QUrl
+from PySide6.QtGui import QColor, QDesktopServices, QFont, QFontMetrics, QPainter, QPen
 from PySide6.QtWidgets import (QAbstractItemView, QAbstractSpinBox, QApplication,
     QComboBox, QDateEdit, QDialog, QFileDialog, QFrame, QHBoxLayout, QHeaderView, QLabel,
     QLineEdit, QListWidget, QListWidgetItem, QMenu, QPlainTextEdit, QPushButton,
-    QScrollArea, QSpinBox, QStackedWidget, QTableWidget, QTableWidgetItem,
+    QScrollArea, QSpinBox, QStackedWidget, QStyledItemDelegate, QTableWidget, QTableWidgetItem,
     QVBoxLayout, QWidget)
 
 from codex_config import STATUS_ACTIVE, STATUS_DRIFTED
@@ -574,6 +574,83 @@ class ModelsPage(existing.ModelsPage):
         QWidget.resizeEvent(self, event)
 
 
+LOG_TIME_ROLE = Qt.UserRole + 1
+LOG_DOT_ROLE = Qt.UserRole + 2
+LOG_MESSAGE_ROLE = Qt.UserRole + 3
+LOG_INK_ROLE = Qt.UserRole + 4
+LOG_DOT_COLOR_ROLE = Qt.UserRole + 5
+LOG_HEIGHT_ROLE = Qt.UserRole + 6
+LOG_PLACEHOLDER_ROLE = Qt.UserRole + 7
+LOG_EVENT_ROLE = Qt.UserRole + 8
+
+LOG_ROW_HEIGHT = 31
+LOG_CONTENT_WIDTH = 472
+LOG_MAX_ROW_HEIGHT = 124
+
+
+def _pixel_font(families: str, size: int) -> QFont:
+    font = QFont()
+    font.setFamilies([item.strip() for item in families.split(",")])
+    font.setPixelSize(size)
+    return font
+
+
+class _LogRowDelegate(QStyledItemDelegate):
+    """Draw one log row without creating a QWidget for every row."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.time_font = _pixel_font(theme.MONO_FAMILY, 12)
+        self.dot_font = _pixel_font(theme.FONT_FAMILY, 10)
+        self.content_font = _pixel_font(theme.FONT_FAMILY, 13)
+        self.content_metrics = QFontMetrics(self.content_font)
+
+    def sizeHint(self, option, index):  # noqa: N802
+        return QSize(0, int(index.data(LOG_HEIGHT_ROLE) or LOG_ROW_HEIGHT))
+
+    def paint(self, painter, option, index):  # noqa: N802
+        palette = theme.current
+        rect = option.rect
+        painter.save()
+        painter.setClipRect(rect)
+        painter.setRenderHint(QPainter.TextAntialiasing, True)
+        if index.data(LOG_PLACEHOLDER_ROLE):
+            painter.setFont(self.content_font)
+            painter.setPen(QColor(palette.muted))
+            painter.drawText(rect.adjusted(8, 0, -8, 0), Qt.AlignCenter,
+                             str(index.data(Qt.DisplayRole) or ""))
+            painter.restore()
+            return
+
+        height = rect.height()
+        painter.setPen(QPen(QColor(palette.line), 1))
+        painter.drawLine(rect.left(), rect.bottom(), rect.right(), rect.bottom())
+
+        painter.setFont(self.time_font)
+        painter.setPen(QColor(palette.ink2))
+        painter.drawText(QRect(rect.left(), rect.top(), 66, height),
+                         Qt.AlignLeft | Qt.AlignVCenter,
+                         str(index.data(LOG_TIME_ROLE) or ""))
+
+        painter.setFont(self.dot_font)
+        painter.setPen(QColor(str(index.data(LOG_DOT_COLOR_ROLE) or palette.ink2)))
+        painter.drawText(QRect(rect.left() + 67, rect.top(), 14, height),
+                         Qt.AlignCenter, str(index.data(LOG_DOT_ROLE) or "·"))
+
+        message = str(index.data(LOG_MESSAGE_ROLE) or "")
+        painter.setFont(self.content_font)
+        painter.setPen(QColor(str(index.data(LOG_INK_ROLE) or palette.ink)))
+        content = QRect(rect.left() + 86, rect.top(), LOG_CONTENT_WIDTH, height)
+        if height > LOG_ROW_HEIGHT:
+            painter.drawText(content.adjusted(0, 4, 0, -5),
+                             Qt.AlignLeft | Qt.AlignTop | Qt.TextWordWrap, message)
+        else:
+            painter.drawText(content, Qt.AlignLeft | Qt.AlignVCenter,
+                             self.content_metrics.elidedText(message, Qt.ElideRight,
+                                                             LOG_CONTENT_WIDTH))
+        painter.restore()
+
+
 class LogsPage(existing.LogsPage):
     def __init__(self, shell):
         init_page(self, shell); self.logs_title = page_title(self, "日志")
@@ -610,7 +687,14 @@ class LogsPage(existing.LogsPage):
         self.filter = segments(self.log_card, [(key, tr(title)) for key, title, _ in self.LEVELS], (286, 19, 272, 30), self._apply_filter)
         self.clear_button = button(self.log_card, "", (566, 21, 20, 26), self.clear_logs, link=True)
         self.clear_button.setIcon(icons.icon("trash", theme.current.ink2, 15)); self.clear_button.setToolTip(tr("清空"))
+        self._content_font = _pixel_font(theme.FONT_FAMILY, 13)
+        self._content_metrics = QFontMetrics(self._content_font)
         self.list_widget = scroll_list(self.log_card, (22, 60, 558, 512))
+        self.list_widget.setFont(self._content_font)
+        self.list_widget.setUniformItemSizes(False)
+        self.list_widget.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+        self.list_widget.setItemDelegate(_LogRowDelegate(self.list_widget))
+        self._logs_dirty = False
         self.trip_host = QWidget(self); self.trip_host.setGeometry(0, 82, 1340, 724); self.trip_host.hide()
         self.trip_list_card = card(self.trip_host, (30, 0, 834, 724))
         self.trip_cols = ((12, 150), (162, 70), (240, 218), (463, 106), (575, 84), (665, 66), (732, 55))
@@ -655,46 +739,123 @@ class LogsPage(existing.LogsPage):
         mitigated["unavailable"] = sum(int(by.get(key) or 0) for key in ("unavailable", "switched_channel", "transient_400"))
         self.error_chart.set_data(mitigated, stats.get("errors") or {})
 
-    def _append(self, *_args):
-        self._render_all(); self._refresh_statistics()
-        if self.tabs.value() == "trips": self._refresh_trips()
+    def _append(self, events):
+        # 隐藏页面只记一个脏标记；回到日志页时一次补齐，避免后台空转。
+        if not self.log_card.isVisible():
+            self._logs_dirty = True
+            if self.tabs.value() == "trips":
+                self._refresh_trips()
+            return
+        levels = self._levels_for(self.filter.value())
+        self.list_widget.setUpdatesEnabled(False)
+        try:
+            for event in events or []:
+                if levels is None or event.get("level") in levels:
+                    self._add_row(event, theme.current, prepend=True)
+        finally:
+            self.list_widget.setUpdatesEnabled(True)
+        self._trim()
+        self._ensure_placeholder()
+        self._refresh_statistics()
 
     def _render_all(self):
-        self.list_widget.clear()
-        levels = self._levels_for(self.filter.value())
-        for event in reversed(self.bridge.events):
-            if levels is None or event.get("level") in levels:
-                self._add_row(event, theme.current)
-        if not self.list_widget.count():
-            self.list_widget.addItem(tr("暂无日志 · 服务启动或配置变更后会显示在这里"))
+        self.list_widget.setUpdatesEnabled(False)
+        try:
+            self.list_widget.clear()
+            levels = self._levels_for(self.filter.value())
+            for event in reversed(self.bridge.events):
+                if levels is None or event.get("level") in levels:
+                    self._add_row(event, theme.current)
+        finally:
+            self.list_widget.setUpdatesEnabled(True)
+        self._ensure_placeholder()
+        self.list_widget.scrollToTop()
+        self._logs_dirty = False
 
-    def _add_row(self, event, palette):
-        result = event.get("request_result")
+    def _add_row(self, event, palette, *, prepend=False):
         message = str(event.get("message") or "")
-        neutral = event.get("level") == "warning" or any(word in message for word in ("重试", "冷却", "切换", "连接失败"))
+        if message.startswith("已路由至 "):
+            return False
+        result = event.get("request_result")
+        neutral = event.get("level") == "warning" or any(
+            word in message for word in ("重试", "冷却", "切换", "连接失败"))
         failed = event.get("level") == "error"
         if result is not None:
-            ok = bool(result.get("ok")); failed = not ok
+            ok = bool(result.get("ok"))
+            failed = not ok
             recovered = bool(result.get("mitigated")) or neutral
-            status = tr("重试后成功") if ok and recovered else tr("成功") if ok else tr("失败 {0}").format(result.get("status") or event.get("status") or "")
+            status = (tr("重试后成功") if ok and recovered else
+                      tr("成功") if ok else
+                      tr("失败 {0}").format(result.get("status") or event.get("status") or ""))
             message = f"{result.get('model') or ''} · {status} · {float(result.get('elapsed') or 0):.1f}s"
             neutral = ok and recovered
         ink = palette.seal if failed else palette.ink
         dot_color = palette.seal if failed else palette.ink2 if neutral else palette.accent
-        row = QWidget(); row.setFixedHeight(31)
-        label(row, str(event.get("time") or ""), (0, 0, 66, 31), 12, muted=True, mono=True)
-        dot = label(row, "○" if neutral and not failed else "●", (67, 0, 14, 31), 10)
-        dot.setStyleSheet(f"font-size: 10px; color: {dot_color}; background: transparent;")
-        content = label(row, message, (86, 0, 472, 31), 13)
-        content.setStyleSheet(f"font-size: 13px; background: transparent; color: {ink};")
-        full_text_tip(content, message)
-        line(row, (0, 30, 558, 1))
-        item = QListWidgetItem(); item.setSizeHint(QSize(558, 31)); self.list_widget.addItem(item); self.list_widget.setItemWidget(item, row)
+        mark = "○" if neutral and not failed else "●"
+        stamp = str(event.get("time") or "")
+        height = self._row_height(message)
+        item = QListWidgetItem(f"{stamp}  {mark}  {message}")
+        item.setData(LOG_TIME_ROLE, stamp)
+        item.setData(LOG_DOT_ROLE, mark)
+        item.setData(LOG_MESSAGE_ROLE, message)
+        item.setData(LOG_INK_ROLE, ink)
+        item.setData(LOG_DOT_COLOR_ROLE, dot_color)
+        item.setData(LOG_HEIGHT_ROLE, height)
+        item.setData(LOG_EVENT_ROLE, dict(event))
+        item.setSizeHint(QSize(0, height))
+        item.setForeground(QColor(ink))
+        if height > LOG_ROW_HEIGHT or self._content_metrics.horizontalAdvance(message) > LOG_CONTENT_WIDTH:
+            item.setToolTip(message)
+        self._drop_placeholder()
+        if prepend:
+            self.list_widget.insertItem(0, item)
+        else:
+            self.list_widget.addItem(item)
         return True
 
+    def _row_height(self, message: str) -> int:
+        if not message or self._content_metrics.horizontalAdvance(message) <= LOG_CONTENT_WIDTH:
+            return LOG_ROW_HEIGHT
+        bounds = self._content_metrics.boundingRect(
+            QRect(0, 0, LOG_CONTENT_WIDTH, 100_000), Qt.TextWordWrap, message)
+        return max(LOG_ROW_HEIGHT, min(LOG_MAX_ROW_HEIGHT, bounds.height() + 9))
+
+    def _drop_placeholder(self):
+        if (self.list_widget.count()
+                and self.list_widget.item(0).data(LOG_PLACEHOLDER_ROLE)):
+            self.list_widget.takeItem(0)
+
+    def _ensure_placeholder(self):
+        if self.list_widget.count():
+            return
+        item = QListWidgetItem(tr("暂无日志 · 服务启动或配置变更后会显示在这里"))
+        item.setData(LOG_PLACEHOLDER_ROLE, True)
+        item.setData(LOG_HEIGHT_ROLE, 512)
+        item.setFlags(Qt.NoItemFlags)
+        item.setSizeHint(QSize(0, 512))
+        self.list_widget.addItem(item)
+
+    def _fit_rows(self):
+        for index in range(self.list_widget.count()):
+            item = self.list_widget.item(index)
+            item.setSizeHint(QSize(0, int(item.data(LOG_HEIGHT_ROLE) or LOG_ROW_HEIGHT)))
+
+    def _trim(self):
+        limit = int(getattr(self.bridge, "EVENT_LIMIT", 600))
+        while self.list_widget.count() > limit:
+            self.list_widget.takeItem(self.list_widget.count() - 1)
+
     def clear_logs(self):
-        if not self.shell.ask(tr("清空实时日志？"), tr("仅清空本次运行的界面事件，不删除用量记录。")): return
-        self.bridge.clear_events(); self._render_all()
+        # 清空的是界面事件流，不涉及用量记录；与旧版一致，点击即清，不弹确认框。
+        self.bridge.clear_events()
+        self._logs_dirty = False
+        self._render_all()
+
+    def showEvent(self, event):  # noqa: N802
+        super().showEvent(event)
+        if getattr(self, "_logs_dirty", False):
+            self._render_all()
+            self._refresh_statistics()
 
     def _active_entries(self):
         entries = []
@@ -817,6 +978,7 @@ class LogsPage(existing.LogsPage):
             self.bridge.export_trip_ledger_csv(path, entries if entries is not None else self._active_entries() + self.bridge.trip_ledger_entries())
 
     def refresh(self, *_args):
+        self._logs_dirty = False
         self._refresh_statistics(); self._render_all()
         if self.tabs.value() == "trips": self._refresh_trips()
 
@@ -905,7 +1067,7 @@ class SettingsPage(existing.SettingsPage):
         self.telemetry_preview.setStyleSheet(f"font-family: '{theme.FONT_FAMILY}'; font-size: 12px; color: {theme.current.ink}; background: {theme.current.paper}; border: 1px solid {theme.current.line}; border-radius: 9px; padding: 10px;")
         self.telemetry_upload_button = button(privacy, tr("查看将上传的内容"), (22, 303, 356, 26), self.open_statistics_details)
         line(privacy, (22, 341, 356, 1))
-        note = label(privacy, tr("API Key 与本地令牌经 DPAPI 加密；正文不保存，推理文本短期缓存。"), (22, 353, 356, 54), 13, muted=True)
+        note = label(privacy, tr("API Key 与本地访问令牌经 Windows DPAPI 加密；正文不保存，推理文本短期缓存。"), (22, 353, 356, 54), 13, muted=True)
         note.setWordWrap(True)
         data = card(self, (910, 566, 400, 132))
         label(data, tr("数据位置"), (22, 16, 356, 32), 17, serif=True, bold=True)
@@ -948,6 +1110,7 @@ class SettingsPage(existing.SettingsPage):
         x = 87
         links = (("官网", lambda: QDesktopServices.openUrl(QUrl(existing.OFFICIAL_WEBSITE))),
             ("GitHub", lambda: QDesktopServices.openUrl(QUrl("https://github.com/mazda6hk-coder/MicroGlow-Relay"))),
+            ("问题反馈", self.open_feedback),
             ("许可证", lambda: self.open_document("USER-AGREEMENT.md", tr("许可证"), section=("## 3. 软件许可", "\n## 4."))),
             ("隐私政策", lambda: self.open_document("PRIVACY-POLICY.md", tr("隐私政策"))),
             ("用户协议", lambda: self.open_document("USER-AGREEMENT.md", tr("用户协议"))),

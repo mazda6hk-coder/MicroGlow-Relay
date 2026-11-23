@@ -468,7 +468,8 @@ QMessageBox QPushButton { background: $surface_alt; color: $text; border: 1px so
                            border-radius: 6px; padding: 5px 16px; min-width: 64px; }
 QMessageBox QPushButton:hover { border-color: $accent; }
 
-#root, #window { background: $background; }
+#root { background: transparent; }
+#window { background: $background; }
 #titlebar { background: $background; border-bottom: 1px solid $border; }
 #sidebar { background: $sidebar; border-bottom: 1px solid $border; }
 #content { background: $background; }

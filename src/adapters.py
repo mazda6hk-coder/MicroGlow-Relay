@@ -7,6 +7,7 @@ may receive Responses, Chat Completions, or Anthropic Messages.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import time
@@ -57,36 +58,97 @@ def read_sse(lines):
                 raise ProtocolFailure("上游流式响应意外中断。", 502, "bad_upstream_stream") from error
 
 
+# namespace 展平分隔符：双下划线。三家参考实现（sub2api / cc-switch /
+# codex-universal-proxy）一致用它，视觉可辨且不会与工具名里的单下划线混淆。
+NAMESPACE_SEP = "__"
+
+# 上游对 function.name 的长度上限（OpenAI 侧为 64）。
+TOOL_NAME_MAX_LEN = 64
+
+
 class ToolNames:
     def __init__(self, tools):
         self.outbound = {}
         self.inbound = {}
+        self.namespaced = {}
+        # 已被占用的出站名：顶层工具名 + 各 namespace 展平名。
+        # 展平时若新名撞上已占用的，说明上游无法区分两个工具 → 报错。
+        self._reserved_names = set()
         self.schemas = []
         self._collect(tools or [])
 
-    def _collect(self, tools, prefix=""):
+    def _collect(self, tools, prefix="", namespace=""):
         for tool in tools:
             if not isinstance(tool, dict):
                 raise ProtocolFailure("工具定义必须是对象。")
             kind = tool.get("type")
             if kind == "namespace":
                 name = str(tool.get("name") or "")
-                self._collect(tool.get("tools") or [], prefix + name + ".")
+                if not name:
+                    raise ProtocolFailure("工具命名空间缺少名称。")
+                # 双下划线分隔：与 sub2api / cc-switch / codex-universal-proxy
+                # 一致。namespace 名本身可能含下划线（mcp__cua_repl），因此回程
+                # 一律查 inbound 映射表还原，不靠字符串切分。
+                self._collect(tool.get("tools") or [], prefix + name + NAMESPACE_SEP,
+                              namespace + name if namespace else name)
                 continue
             if kind not in {"function", "custom"}:
                 raise ProtocolFailure("所选供应商仅支持函数工具与自定义文本工具。")
             original = prefix + str(tool.get("name") or "")
             if not original:
                 raise ProtocolFailure("工具缺少名称。")
-            safe = "".join(char if char.isalnum() or char in "_-" else "_" for char in original)[:64]
+            safe = "".join(char if char.isalnum() or char in "_-" else "_" for char in original)[:TOOL_NAME_MAX_LEN]
+            if len(safe) != len("".join(char if char.isalnum() or char in "_-" else "_" for char in original)):
+                # 超长：截断前缀 + sha256 短哈希后缀，保证可逆且不撞名。
+                # 与 sub2api flattenNamespaceToolName / cc-switch 同口径。
+                digest = hashlib.sha256(original.encode("utf-8")).hexdigest()[:10]
+                suffix = NAMESPACE_SEP + digest
+                safe = safe[:TOOL_NAME_MAX_LEN - len(suffix)] + suffix
             base = safe or "tool"
+            if namespace:
+                # 展平名撞名检测。判据是「工具身份」而不是字符串是否相同：
+                # 顶层工具 ns__dup 与 namespace "ns" 下的 dup 展平后都叫 ns__dup，
+                # 但原始名恰好也相同，只看 original 会误判为"同一个工具"。
+                # 用 (namespace, 裸工具名) 身份判定才准。
+                #
+                # 必须在去重改名之前：去重循环会把撞名改成 safe_2 发出去，
+                # 上游收到两个不同工具却只有一个真名，调用其一必然错，比报错更难查。
+                # 撞名检测（两遍口径）：展平名若与「顶层工具名」或「另一个
+                # namespace 的展平名」相同，上游只看到一串 function.name，
+                # 无法区分两个工具，回程也无法还原 → 明确报错。
+                #
+                # 判据是工具身份 (namespace, 裸工具名)，不是字符串是否相同：
+                # 顶层工具 ns__dup 与 namespace "ns" 下的 dup 展平后都叫
+                # ns__dup，原始名恰好也相同，只看 original 会误判为同一工具。
+                #
+                # 必须在去重改名之前：去重循环会把撞名改成 safe_2 发出去，
+                # 上游收到两个不同工具却只有一个真名，调用其一必然错，比报错难查。
+                if safe in self._reserved_names:
+                    held = self.namespaced.get(safe)
+                    same_identity = (held is not None
+                                     and held == (namespace, str(tool.get("name") or "")))
+                    if not same_identity:
+                        raise ProtocolFailure(
+                            f"工具命名空间展平后与已有工具重名（{safe}），无法区分，请重命名其中之一。",
+                            400, "tool_name_conflict")
             suffix = 2
             while safe in self.inbound and self.inbound[safe] != original:
                 tail = "_" + str(suffix)
-                safe = base[:64-len(tail)] + tail
+                safe = base[:TOOL_NAME_MAX_LEN-len(tail)] + tail
                 suffix += 1
+            if not namespace and safe in self.namespaced:
+                # 顶层工具的名字撞上某个 namespace 子工具的展平名（反向撞名，
+                # 顶层声明排在 namespace 之后才会走到这里）。上游只看到一串
+                # function.name，两个工具无法区分 → 明确报错。
+                raise ProtocolFailure(
+                    f"工具命名空间展平后与已有工具重名（{safe}），无法区分，请重命名其中之一。",
+                    400, "tool_name_conflict")
             self.outbound[original] = safe
             self.inbound[safe] = original
+            if namespace:
+                # 展平来源单独记账：回程据此还原 (name, namespace)，不依赖字符串切分。
+                self.namespaced[safe] = (namespace, str(tool.get("name") or ""))
+            self._reserved_names.add(safe)
             if kind == "custom":
                 parameters = {
                     "type": "object",
@@ -116,14 +178,38 @@ class ToolNames:
             for schema in self.schemas
         )
 
+    def decode_call(self, name: str) -> tuple[str, str | None, bool]:
+        """回程把一次工具调用还原成 (裸工具名, namespace, 是否 custom)。
+
+        custom/freeform 工具（Codex 的 exec/apply_patch）展平后名字是
+        ``ns__tool``，Codex 按 namespace+name 两段识别——只还原成展平名会
+        缺 namespace 字段，Codex 端判 unsupported call。所以 custom 也要
+        走 namespace 还原，回程 item 必须带 namespace。
+        """
+        original, custom = self.decode(name)
+        if not custom:
+            tool, ns = self.split_namespace(original)
+            return tool, ns, False
+        entry = self.namespaced.get(name)
+        if entry is not None:
+            return entry[1], entry[0], True
+        tool, ns = self.split_namespace(original)
+        return tool, ns, True
+
     def split_namespace(self, name: str) -> tuple[str, str | None]:
         """回程把展平名拆回 (tool, namespace)。
 
         Codex 桌面端按 namespace+name 两段识别 MCP/插件工具；chat 上游只能带
-        单段 function.name，出站展平为 ``ns.tool``。回程必须拆回，否则 Codex
-        收到整串 name、namespace=null 判 unsupported call。仅对确由 namespace
-        展平而来（inbound 映射含 '.'）的名字拆分，普通函数名不受影响。
+        单段 function.name，出站展平为 ``ns__tool``。回程必须拆回，否则 Codex
+        收到整串 name、namespace=null 判 unsupported call。
+
+        还原走 namespaced 映射表（展平时记账），不靠字符串切分——namespace 名
+        本身可能含下划线（mcp__cua_repl），切分会有歧义。映射表查不到时退回
+        inbound 的点号形态，兼容旧记录。
         """
+        entry = self.namespaced.get(name)
+        if entry is not None:
+            return entry[1], entry[0]
         original = self.inbound.get(name, name)
         if "." in original:
             ns, _, tool = original.rpartition(".")
@@ -136,15 +222,78 @@ class ToolNames:
         name = str(item.get("name") or "")
         ns = item.get("namespace")
         if ns:
-            return self.encode(f"{ns}.{name}")
+            return self.encode(f"{ns}{NAMESPACE_SEP}{name}")
         return self.encode(name)
+
+    def canonicalise(self, name: str) -> tuple[str, str | None]:
+        """把模型自拼的花式工具名归一到声明过的规范名。
+
+        chat 通道没有 namespace 概念，展平后的名字会进模型上下文，模型于是
+        自己拼出 ``mcp__codex_app.send_message_to_thread`` /
+        ``mcp__codex_app__send_message_to_thread`` /
+        ``mcp__codex_app_codex_app_send_message_to_thread`` 等形态，Codex 端
+        判 unsupported call。这里按「与已声明的 (namespace, tool) 做
+        去分隔符匹配」把它还原成规范名，并给出 (tool, namespace)。
+        """
+        original = self.inbound.get(name)
+        if original is not None:
+            return self.split_namespace(original)
+        flat = "".join(ch for ch in name if ch.isalnum()).lower()
+        if not flat:
+            return name, None
+        # 展平表优先：namespaced 里存着 (namespace, 裸工具名) 的真实归属。
+        for ns, tool in self.namespaced.values():
+            key_tool = "".join(ch for ch in tool if ch.isalnum()).lower()
+            key_ns = "".join(ch for ch in ns if ch.isalnum()).lower()
+            if not key_tool or not key_ns:
+                continue
+            if flat.endswith(key_tool) and key_ns in flat:
+                return tool, ns
+        # 退回 inbound 的点号形态（兼容旧记录：早期展平用 ns.tool）。
+        for known in self.inbound.values():
+            if "." not in known:
+                continue
+            tool, ns = self.split_namespace(known)
+            key_tool = "".join(ch for ch in tool if ch.isalnum()).lower()
+            key_ns = "".join(ch for ch in ns if ch.isalnum()).lower()
+            if not key_tool or not key_ns:
+                continue
+            if flat.endswith(key_tool) and key_ns in flat:
+                return tool, ns
+        return name, None
+
+
+# Chat Completions 的 image_url.detail 合法值只有 auto/low/high。
+# Codex 走 Responses 时会发 detail:"original"（原图，Responses 专有），
+# 实测取值分布：high 31 次、original 20 次，从不发 auto。
+# 严格网关只认 Chat 的合法值，遇到 original 直接 400
+# （星思云 glm-5.3 responses 实测：original→400，auto→200；
+#   cc-switch v3.20.4 #7476 记载同类网关会让整段会话此后每轮 400——
+#   Codex 每轮重放完整历史，一张图就毁掉整段会话）。
+#
+# 收敛策略：Chat 通道把 original 降级为 high（保持"看原图"的语义，
+# 比降成 auto 更贴近原意）；Responses 通道保留 original 原样——
+# Responses 原生支持它。但上游不认时由反应式重试兜底。
+CHAT_IMAGE_DETAILS = ("auto", "low", "high")
+
+
+def _converge_chat_image_detail(detail) -> str:
+    if not isinstance(detail, str):
+        return "auto"
+    value = detail.strip().lower()
+    if value in CHAT_IMAGE_DETAILS:
+        return value
+    if value == "original":
+        # Responses 的"原图"，Chat 没有对应档位；用 high 最接近。
+        return "high"
+    return "auto"
 
 
 def _image_for_chat(part: dict) -> dict:
     url = part.get("image_url")
     if not isinstance(url, str) or not url:
         raise ProtocolFailure("图片内容缺少 image_url。")
-    return {"type": "image_url", "image_url": {"url": url, "detail": part.get("detail") or "auto"}}
+    return {"type": "image_url", "image_url": {"url": url, "detail": _converge_chat_image_detail(part.get("detail"))}}
 
 
 def _message_content(content):
@@ -287,6 +436,104 @@ def _simplify_parameters(params) -> dict:
     if out.get("type") != "object":
         out["type"] = "object"
         out.setdefault("properties", {})
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Codex 载体提升（additional_tools / tool_search_output）
+#
+# Codex 0.154 起把插件、MCP、执行命名空间等额外工具放进一个
+# {"type":"additional_tools","role":"developer","tools":[...]} 输入项，而不是
+# 顶层 tools。chat 通道只有单段 function.name，装不下这个私有载体：
+#   * 载体本身不是消息，落到通用消息分支会造出 content: null 的 system 消息，
+#     严格 Chat 网关直接 400（cc-switch v3.20.4 #7454 踩过这个坑）；
+#   * 载体里的工具若被丢掉，Codex 的子智能体（collaboration/spawn_agent）、
+#     MCP 插件、tool_search 全部不可用，表现为 Codex 端 "unsupported call"。
+#
+# 做法与 sub2api(EffectiveResponsesTools)、cc-switch(collect_input_declared_tools)
+# 一致：顶层 tools 与 input 载体两处都收，合并成同一份工具声明；载体本身
+# 从 input 移除（它没有 content，转成消息就是错）。
+# ---------------------------------------------------------------------------
+
+# 只提升 additional_tools：它是纯工具声明，没有正文，移走不丢语义。
+#
+# tool_search_output 不在此列：它是「工具搜索的结果」，带 call_id / execution /
+# status / tools，是有内容的一等输入项——移走等于告诉上游"没搜过"。
+# 参考实现（codex-universal-proxy liftAdditionalToolsInput / ingestNamespaces）
+# 的口径是：tool_search_output 留在 input 里，另外把里面的 tools 记进
+# 可调用工具表，让搜到的工具在下一轮能被调用。
+#
+# 我们当前不暴露 tool_search 给上游（codex_config.py 里 supports_search_tool=False，
+# Codex 因此根本不会发原生 tool_search 工具），所以这里只需要保证
+# tool_search_output 作为输入项被正确透传，不被误删。
+CARRIER_TYPES = ("additional_tools",)
+
+
+def lift_tool_carriers(body):
+    """把 input 里的工具载体提升到顶层 tools，并从 input 移除载体本身。
+
+    仅供 chat 通道使用。Responses 上游原生认识 additional_tools 载体，且部分
+    上游（星思云 kimi-k3.1-pro 实测）**拒收**顶层 namespace 工具——把载体
+    提升成顶层 tools 会让这类上游直接 400。responses 通道因此保持载体原样。
+
+    返回 (新 body, 是否变化)。只作用于本次请求副本，不改写调用方历史。
+    """
+    if not isinstance(body, dict):
+        return body, False
+    source = body.get("input")
+    if not isinstance(source, list):
+        return body, False
+    lifted = []
+    kept = []
+    changed = False
+    for item in source:
+        if not isinstance(item, dict):
+            kept.append(item)
+            continue
+        kind = item.get("type")
+        if kind in CARRIER_TYPES and isinstance(item.get("tools"), list):
+            lifted.extend(item["tools"])
+            changed = True
+            continue
+        if kind == "tool_search_output" and isinstance(item.get("tools"), list):
+            # 工具搜索的结果：这一项本身必须原样留在 input 里（它是内容，
+            # 带 call_id/execution/status），但里面的工具要能被调用——
+            # 所以额外提升一份，声明进 tools，让下一轮可以调用搜到的工具。
+            # 参考实现：codex-universal-proxy 的 ingestNamespaces +
+            # flattenDiscoveredTools（search_page_file_references 同款思路）。
+            lifted.extend(item["tools"])
+            changed = True
+            kept.append(item)
+            continue
+        kept.append(item)
+    if not changed:
+        return body, False
+    result = dict(body)
+    result["input"] = kept
+    # 载体里的定义是 turn-local 的最新一份，优先于顶层陈旧定义。
+    # 载体里的定义是 turn-local 的最新一份，必须排在顶层定义之后：
+    # dedupe_tool_declarations 反向遍历、保留最后一份，排在后面才会被保留。
+    # （放在前面会让顶层陈旧定义胜出——Codex 0.154+ 每轮都发载体，
+    #   顶层那份往往是上一轮的旧定义。）
+    result["tools"] = list(body.get("tools") or []) + lifted
+    return result, True
+
+
+def dedupe_tool_declarations(tools):
+    """同名工具只保留最后一份（载体里的更新，覆盖顶层陈旧定义）。"""
+    seen = set()
+    out = []
+    for tool in reversed(tools):
+        if not isinstance(tool, dict):
+            out.append(tool)
+            continue
+        name = tool.get("name")
+        if tool.get("type") in {"function", "custom"} and isinstance(name, str) and name:
+            if name in seen:
+                continue
+            seen.add(name)
+        out.append(tool)
+    out.reverse()
     return out
 
 
@@ -706,9 +953,16 @@ PLACEHOLDER_CIPHERTEXT = re.compile(
 
 
 def _is_openai_upstream(profile: dict) -> bool:
-    """目标上游是不是 OpenAI 官方——只有它解得开 reasoning 密文。"""
+    """目标上游是不是 OpenAI 官方——只有它解得开 reasoning 密文。
+
+    原生直通（``_native_passthrough``）走的是 Codex 自己的 ChatGPT 后端，
+    同一个账号产出、同一个账号消费，按官方方向处理。
+    """
+    if profile.get("_native_passthrough"):
+        return True
     host = (urlsplit(str(profile.get("base_url") or "")).hostname or "").lower()
-    return host == "api.openai.com" or host.endswith(".openai.com")
+    return (host == "api.openai.com" or host.endswith(".openai.com")
+            or host == "chatgpt.com")
 
 
 def _fold_reasoning_text_into_summary(item: dict) -> None:
@@ -973,9 +1227,64 @@ def adapt_reasoning_input(payload: dict, profile: dict, *, force: str = "") -> t
     return result, True
 
 
+# ---------------------------------------------------------------------------
+# 思考参数收敛：部分上游只认少数 reasoning 取值。
+#
+# 实测（星思云 kimi-k3.1-pro，2026-11-20）：reasoning.summary="detailed" 被拒，
+# 报「思考参数的类型或取值不正确」；summary="auto" 正常。同样，reasoning 项的
+# summary 形态（有文本或空数组）被拒，只有 content.reasoning_text 被接受。
+#
+# 策略：先按上游探测过的合法取值收敛 reasoning 字段；命中上游报错时由
+# server 的反应式层再降级一次（strip_format/… 的同类思路）。
+# ---------------------------------------------------------------------------
+
+# 各上游已验证合法的 reasoning.summary 取值。空集合表示该上游未探测过，
+# 不做收敛（避免误伤）。
+REASONING_SUMMARY_ALLOWED = {
+    "xing.xinxinyuntu.top": ("auto", "concise"),
+    "api.xinxinyuntu.top": ("auto", "concise"),
+}
+
+
+def _allowed_reasoning_summaries(profile: dict) -> tuple:
+    host = (urlsplit(str(profile.get("base_url") or "")).hostname or "").lower()
+    for suffix, allowed in REASONING_SUMMARY_ALLOWED.items():
+        if host.endswith(suffix):
+            return allowed
+    return ()
+
+
+def converge_reasoning_params(payload: dict, profile: dict) -> tuple:
+    """把 reasoning 字段收敛到上游已验证的取值。返回 (payload, 是否变化)。"""
+    allowed = _allowed_reasoning_summaries(profile)
+    if not allowed:
+        return payload, False
+    reasoning = payload.get("reasoning")
+    if not isinstance(reasoning, dict):
+        return payload, False
+    summary = reasoning.get("summary")
+    if summary is None or summary in allowed:
+        return payload, False
+    patched = dict(reasoning)
+    patched["summary"] = allowed[0]
+    result = dict(payload)
+    result["reasoning"] = patched
+    return result, True
+
+
 def prepare_request(body: dict, profile: dict, reasoning_cache=None):
     if not isinstance(body, dict) or not isinstance(body.get("model"), str):
         raise ProtocolFailure("请求必须包含 model 字符串。")
+    if profile.get("_native_passthrough"):
+        # 官方直通：Codex 发出的就是官方后端认识的形状，这里只锁出口模型名、
+        # 保证流式，其余字段原样送入——工具收敛、参数改写都会破坏 responses-lite。
+        # 推理项仍过一遍中和：会话里若混过第三方轮次，外来形态官方不收。
+        payload = dict(body)
+        payload["model"] = profile["model"]
+        payload["stream"] = True
+        payload["store"] = False
+        payload, _native_changed = adapt_reasoning_input(payload, profile)
+        return "", payload, None, "responses"
     if isinstance(body.get("input"), list):
         # 孤儿工具结果在这里统一清洗：chat / anthropic / responses 三条路径共用。
         # 只作用于本次请求副本，绝不改写调用方的 body 与本地历史。
@@ -984,6 +1293,7 @@ def prepare_request(body: dict, profile: dict, reasoning_cache=None):
     if isinstance(body.get("tools"), list):
         # 第 3+2 层：已知不兼容工具形状快洗 + 未知载体兜底收敛。
         body = dict(body)
+        body["tools"] = dedupe_tool_declarations(body["tools"])
         converged, _tools_changed = converge_tools(body["tools"])
         body["tools"] = converged
     if body.get("tools") and not profile.get("tool_calls"):
@@ -998,6 +1308,17 @@ def prepare_request(body: dict, profile: dict, reasoning_cache=None):
     if not endpoint.endswith(required_suffix):
         endpoint = complete_endpoint(endpoint, protocol)
     profile = dict(profile, base_url=endpoint)
+    if protocol in {"chat", "anthropic"}:
+        # 载体提升：Codex 把额外工具装在 input 的 additional_tools / tool_search_output
+        # 载体里，不是顶层 tools。chat 通道只有单段 function.name，装不下这个
+        # 私有载体——不提升就直接 400（丢掉子智能体等 namespace 工具）。
+        # responses 通道不动：上游原生认识载体，部分上游还拒收顶层 namespace。
+        body, _lifted = lift_tool_carriers(body)
+        if isinstance(body.get("tools"), list):
+            body = dict(body)
+            body["tools"] = dedupe_tool_declarations(body["tools"])
+            converged, _c = converge_tools(body["tools"])
+            body["tools"] = converged
     if protocol == "chat":
         return (*_chat_request(body, profile, reasoning_cache), protocol)
     if protocol == "anthropic":
@@ -1024,6 +1345,7 @@ def prepare_request(body: dict, profile: dict, reasoning_cache=None):
             for item in payload["input"]
         ]
     payload, _reasoning_changed = adapt_reasoning_input(payload, profile)
+    payload, _reasoning_params_changed = converge_reasoning_params(payload, profile)
     return "", payload, None, protocol
 
 
@@ -1150,20 +1472,24 @@ class ResponseBuilder:
             self.emit("response.content_part.done", item_id=self.message_id, output_index=index, content_index=0, part=item["content"][0])
             self.emit("response.output_item.done", output_index=index, item=item)
         for _, call in sorted(self.calls.items()):
-            original, custom = self.names.decode(call["name"])
+            tool_name, tool_ns, custom = self.names.decode_call(call["name"])
             arguments = call["arguments"] or "{}"
             if custom:
                 try:
                     raw_input = json.loads(arguments).get("input", "")
                 except json.JSONDecodeError:
                     raw_input = arguments
-                item = {"id": "item_" + uuid.uuid4().hex, "type": "custom_tool_call", "status": "completed", "call_id": call["id"], "name": original, "input": raw_input}
+                item = {"id": "item_" + uuid.uuid4().hex, "type": "custom_tool_call", "status": "completed", "call_id": call["id"], "name": tool_name, "input": raw_input}
+                if tool_ns:
+                    # custom/freeform 工具同样要带 namespace：Codex 按
+                    # namespace+name 两段识别，缺 namespace 会判 unsupported call。
+                    item["namespace"] = tool_ns
             else:
                 try:
                     json.loads(arguments)
                 except json.JSONDecodeError as error:
                     raise ProtocolFailure("上游返回了无效的工具参数 JSON。", 502, "invalid_tool_arguments") from error
-                tool_name, tool_ns = self.names.split_namespace(call["name"])
+                tool_name, tool_ns = self.names.canonicalise(call["name"])
                 item = {"id": "item_" + uuid.uuid4().hex, "type": "function_call", "status": "completed", "call_id": call["id"], "name": tool_name, "arguments": arguments}
                 if tool_ns:
                     item["namespace"] = tool_ns

@@ -29,7 +29,7 @@ from codex_config import PROVIDER_ID, STATUS_ACTIVE, STATUS_DRIFTED, STATUS_NONE
 from server import Gateway  # noqa: E402
 from storage import APP_NAME, ROUTER_MODEL, Settings  # noqa: E402
 
-from app import icons, theme  # noqa: E402
+from app import final_views, icons, theme  # noqa: E402
 from app.bridge import Bridge  # noqa: E402
 from app.dialogs import ProfileDialog  # noqa: E402
 from app.views import PAGES  # noqa: E402
@@ -466,7 +466,9 @@ class ShellTests(UiTestCase):
         page._apply_filter("error")
         self.assertEqual(page.list_widget.count(), 1)
         page.clear_logs()
-        self.assertEqual(page.list_widget.count(), 0)
+        # 空列表保留一条不可交互的占位行（居中提示），不是真实日志。
+        self.assertEqual(page.list_widget.count(), 1)
+        self.assertTrue(page.list_widget.item(0).data(final_views.LOG_PLACEHOLDER_ROLE))
 
     def test_settings_page_reads_and_writes_port(self):
         page = self.shell.pages["settings"]
@@ -691,7 +693,7 @@ class CodexIntegrationTests(UiTestCase):
         self.bridge.connect_codex()
         _config, catalog = export_files(self.bridge.settings)
         payload = json.loads(Path(catalog).read_text(encoding="utf-8"))
-        self.assertEqual(payload["models"][0]["slug"], ROUTER_MODEL)
+        self.assertNotIn(ROUTER_MODEL, [item["slug"] for item in payload["models"]])
         self.assertTrue(Path(self.bridge.codex_target()["catalog"]).exists())
 
 

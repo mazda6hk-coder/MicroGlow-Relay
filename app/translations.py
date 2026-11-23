@@ -3084,7 +3084,7 @@ for _code, _values in _UNDO_BAR_TRANSLATIONS.items():
     TRANSLATIONS[_code].update(zip(_UNDO_BAR_KEYS, _values))
 
 # ---------------------------------------------------------------------------
-# 顶栏骨架文案（任务书第 1 节）。
+# 顶栏骨架文案（UI-090-SKELETON，任务书第 1 节）。
 # ---------------------------------------------------------------------------
 _SKELETON_KEYS = ('SETUP',)
 # SETUP 作为专有页名保留原文（各语言一致），但登记进目录避免看门狗漏检。
@@ -3115,7 +3115,7 @@ for _code, _values in _DAYNIGHT_TIP_TRANSLATIONS.items():
     TRANSLATIONS[_code].update(zip(_DAYNIGHT_TIP_KEYS, _values))
 
 # ---------------------------------------------------------------------------
-# 日志页三分类 + SETUP 客户端接入（任务书第 7/8 节）。
+# 日志页三分类 + SETUP 客户端接入（UI-090-LOGS-SETUP，任务书第 7/8 节）。
 # ---------------------------------------------------------------------------
 _LOGS_SETUP_KEYS = (
     '已为你化解波动',
@@ -3190,14 +3190,14 @@ for _code, _values in _LOGS_SETUP_TRANSLATIONS.items():
 
 # ---- 0.9 版式新增文案（工作台 Hero / Trip 单卡 / 模型渠道 / 日志三分类 / SETUP）
 _EXTRA = {
-    'API Key 与本地令牌经 DPAPI 加密；正文不保存，推理文本短期缓存。': {
-        'zh-TW': 'API Key 與本機權杖經 DPAPI 加密；正文不儲存，推理文本短期快取。',
-        'en': 'API keys and the local token are DPAPI-encrypted; bodies are not stored, reasoning text is cached briefly.',
-        'de': 'API-Schlüssel und lokales Token sind DPAPI-verschlüsselt; Inhalte werden nicht gespeichert, Denktext kurz zwischengespeichert.',
-        'ja': 'APIキーとローカルトークンはDPAPIで暗号化。本文は保存せず、推論テキストは短期間キャッシュします。',
-        'ko': 'API 키와 로컬 토큰은 DPAPI로 암호화됩니다. 본문은 저장하지 않으며 추론 텍스트만 짧게 캐시합니다.',
-        'es': 'Las claves API y el token local usan DPAPI; los cuerpos no se guardan y el texto de razonamiento se cachea brevemente.',
-        'th': 'คีย์ API และโทเคนในเครื่องเข้ารหัสด้วย DPAPI ไม่บันทึกเนื้อหา แคชข้อความการคิดชั่วคราว',
+    'API Key 与本地访问令牌经 Windows DPAPI 加密；正文不保存，推理文本短期缓存。': {
+        'zh-TW': 'API Key 與本機存取權杖經 Windows DPAPI 加密；正文不儲存，推理文本短期快取。',
+        'en': 'API keys and the local access token are encrypted with Windows DPAPI; bodies are not stored, and reasoning text is cached briefly.',
+        'de': 'API-Schlüssel und lokales Zugriffstoken sind mit Windows DPAPI verschlüsselt; Inhalte werden nicht gespeichert, Denktext wird kurz zwischengespeichert.',
+        'ja': 'API キーとローカルアクセストークンは Windows DPAPI で暗号化。本文は保存せず、推論テキストは短期間キャッシュします。',
+        'th': 'คีย์ API และโทเคนการเข้าถึงในเครื่องเข้ารหัสด้วย Windows DPAPI ไม่บันทึกเนื้อหา และแคชข้อความการคิดชั่วคราว',
+        'es': 'Las claves API y el token de acceso local se cifran con DPAPI de Windows; los cuerpos no se guardan y el texto de razonamiento se cachea brevemente.',
+        'ko': 'API 키와 로컬 액세스 토큰은 Windows DPAPI로 암호화됩니다. 본문은 저장하지 않으며 추론 텍스트만 짧게 캐시합니다.',
     },
     'Codex CLI': {
         'zh-TW': 'Codex CLI',
@@ -4100,14 +4100,14 @@ for _text, _values in _EXTRA_3.items():
 
 # 0.9 UI 收口新增文案：八语言译文（人工校订）。
 _EXTRA_4 = {
-    'API Key 与本地令牌经 DPAPI 加密；正文不保存，推理文本短期缓存。': {
-        'zh-TW': 'API Key 與本機權杖經 DPAPI 加密；正文不儲存，推理文本短期快取。',
-        'en': 'API keys and the local token are DPAPI-encrypted; bodies are not stored, reasoning text is cached briefly.',
-        'de': 'API-Schlüssel und lokales Token sind DPAPI-verschlüsselt; Inhalte werden nicht gespeichert, Denktext kurz zwischengespeichert.',
-        'ja': 'APIキーとローカルトークンはDPAPIで暗号化。本文は保存せず、推論テキストは短期間キャッシュします。',
-        'ko': 'API 키와 로컬 토큰은 DPAPI로 암호화됩니다. 본문은 저장하지 않으며 추론 텍스트만 짧게 캐시합니다.',
-        'es': 'Las claves API y el token local usan DPAPI; los cuerpos no se guardan y el texto de razonamiento se cachea brevemente.',
-        'th': 'คีย์ API และโทเคนในเครื่องเข้ารหัสด้วย DPAPI ไม่บันทึกเนื้อหา แคชข้อความการคิดชั่วคราว',
+    'API Key 与本地访问令牌经 Windows DPAPI 加密；正文不保存，推理文本短期缓存。': {
+        'zh-TW': 'API Key 與本機存取權杖經 Windows DPAPI 加密；正文不儲存，推理文本短期快取。',
+        'en': 'API keys and the local access token are encrypted with Windows DPAPI; bodies are not stored, and reasoning text is cached briefly.',
+        'de': 'API-Schlüssel und lokales Zugriffstoken sind mit Windows DPAPI verschlüsselt; Inhalte werden nicht gespeichert, Denktext wird kurz zwischengespeichert.',
+        'ja': 'API キーとローカルアクセストークンは Windows DPAPI で暗号化。本文は保存せず、推論テキストは短期間キャッシュします。',
+        'th': 'คีย์ API และโทเคนการเข้าถึงในเครื่องเข้ารหัสด้วย Windows DPAPI ไม่บันทึกเนื้อหา และแคชข้อความการคิดชั่วคราว',
+        'es': 'Las claves API y el token de acceso local se cifran con DPAPI de Windows; los cuerpos no se guardan y el texto de razonamiento se cachea brevemente.',
+        'ko': 'API 키와 로컬 액세스 토큰은 Windows DPAPI로 암호화됩니다. 본문은 저장하지 않으며 추론 텍스트만 짧게 캐시합니다.',
     },
     '{0} 个模型组 · {1} 个渠道': {
         'zh-TW': '{0} 個模型組 · {1} 個通路',

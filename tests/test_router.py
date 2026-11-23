@@ -39,6 +39,7 @@ from server import (
     fetch_models,
     probe_profile,
 )
+from native_models import NATIVE_SLUGS
 from storage import (APP_NAME, ROUTER_MODEL, Settings, endpoint_candidates,
                      normalize_base_url, validate_connection, validate_profile)
 
@@ -635,12 +636,12 @@ class IntegrationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             store = Settings(Path(directory))
             store.upsert(profile(image_input=True), "")
-            model = model_catalog(store)["models"][0]
-            self.assertEqual(model["slug"], ROUTER_MODEL)
-            self.assertEqual(model["input_modalities"], ["text", "image"])
+            models = model_catalog(store)["models"]
+            self.assertNotIn(ROUTER_MODEL, [item["slug"] for item in models])
+            self.assertEqual(models[0]["input_modalities"], ["text", "image"])
 
     def test_catalog_exports_every_profile(self):
-        """N 个 profile → N+1 条目录，slug 用共享友好名，窗口各自跟随。"""
+        """N 个 profile → N 条目录（不再导出「跟随」项），slug 用共享友好名。"""
         with tempfile.TemporaryDirectory() as directory:
             store = Settings(Path(directory))
             first = store.upsert(profile(model="alpha-model", input_tokens=200_000), "")
@@ -648,18 +649,33 @@ class IntegrationTests(unittest.TestCase):
             models = model_catalog(store)["models"]
             # 友好名（model_names.py）：Codex 目录与 Claude /model 共用；
             # 配置 id 仍被网关接受，见 test_friendly_names.py。
+            profiles_only = [m for m in models if m["slug"] not in NATIVE_SLUGS]
+            self.assertEqual([m["slug"] for m in profiles_only],
+                             ["alpha-model", "beta-model"])
+            self.assertEqual(profiles_only[0]["context_window"], 200_000)
+            self.assertEqual(profiles_only[1]["context_window"], 400_000)
+
+    def test_catalog_groups_by_provider_and_uses_bar_labels(self):
+        """同一供应商的条目连续排列，块内按模型名；名称统一「供应商｜模型」。"""
+        with tempfile.TemporaryDirectory() as directory:
+            store = Settings(Path(directory))
+            store.upsert(profile(model="b-model", provider_name="乙供应商"), "")
+            store.upsert(profile(model="z-model", provider_name="甲供应商"), "")
+            store.upsert(profile(model="a-model", provider_name="甲供应商"), "")
+            models = [m for m in model_catalog(store)["models"]
+                      if m["slug"] not in NATIVE_SLUGS]
+            # 块序按供应商首次出现的顺序（乙先登记 → 乙块在前），块内按模型名。
             self.assertEqual([m["slug"] for m in models],
-                             [ROUTER_MODEL, "alpha-model", "beta-model"])
-            self.assertEqual(models[1]["context_window"], 200_000)
-            self.assertEqual(models[2]["context_window"], 400_000)
-            self.assertEqual(models[0]["context_window"], 200_000)
+                             ["b-model", "a-model", "z-model"])
+            self.assertTrue(models[0]["display_name"].startswith("乙供应商｜"))
+            self.assertTrue(models[1]["display_name"].startswith("甲供应商｜"))
 
     def test_profile_entry_maps_reasoning_effort(self):
         """切到某模型时默认推理档位与该 profile 配置一致，名称含供应商。"""
         with tempfile.TemporaryDirectory() as directory:
             store = Settings(Path(directory))
             store.upsert(profile(reasoning_effort="高"), "")
-            entry = model_catalog(store)["models"][1]
+            entry = model_catalog(store)["models"][0]
             self.assertEqual(entry["slug"], "demo-model")  # 友好名，不再是配置 id
             self.assertEqual(entry["default_reasoning_level"], "high")
             self.assertIn("测试供应商", entry["display_name"])
@@ -675,7 +691,7 @@ class IntegrationTests(unittest.TestCase):
             target.write_text('model = "original"\n', encoding="utf-8")
             integrate(store, target)
             installed = tomllib.loads(target.read_text(encoding="utf-8"))
-            self.assertEqual(installed["model"], ROUTER_MODEL)
+            self.assertEqual(installed["model"], "demo-model")
             self.assertNotIn("model_context_window", installed)
 
     def test_refresh_catalog_tracks_profile_changes(self):
@@ -690,10 +706,12 @@ class IntegrationTests(unittest.TestCase):
             self.assertFalse(refresh_catalog_if_active(store))
             integrate(store, target)
             catalog = store.directory / "microglow-relay-codex" / "models.json"
-            self.assertEqual(len(json.loads(catalog.read_text(encoding="utf-8"))["models"]), 2)
+            self.assertEqual(len([m for m in json.loads(catalog.read_text(encoding="utf-8"))["models"]
+                                   if m["slug"] not in NATIVE_SLUGS]), 1)
             store.upsert(profile(model="gamma-model"), "")
             self.assertTrue(refresh_catalog_if_active(store))
-            self.assertEqual(len(json.loads(catalog.read_text(encoding="utf-8"))["models"]), 3)
+            self.assertEqual(len([m for m in json.loads(catalog.read_text(encoding="utf-8"))["models"]
+                                   if m["slug"] not in NATIVE_SLUGS]), 2)
 
     def test_codex_config_roundtrip(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -706,7 +724,7 @@ class IntegrationTests(unittest.TestCase):
             target.write_text(original, encoding="utf-8")
             integrate(store, target)
             installed = target.read_text(encoding="utf-8")
-            self.assertIn(f'model = "{ROUTER_MODEL}"', installed)
+            self.assertIn('model = "demo-model"', installed)
             self.assertIn("custom = 7", installed)
             restore(store)
             self.assertEqual(tomllib.loads(target.read_text(encoding="utf-8")), tomllib.loads(original))
@@ -725,7 +743,7 @@ class IntegrationTests(unittest.TestCase):
             installed = target.read_text(encoding="utf-8")
             target.write_text(installed.replace(f'model_provider = "{PROVIDER_ID}"',
                                                 f'model_provider = "{prior_provider}"')
-                              .replace(f'model = "{ROUTER_MODEL}"', f'model = "{prior_model}"')
+                              .replace('model = "demo-model"', f'model = "{prior_model}"')
                               .replace(f'[model_providers.{PROVIDER_ID}]',
                                        f'[model_providers.{prior_provider}]'), encoding="utf-8")
             recorder = receipt_path(store)

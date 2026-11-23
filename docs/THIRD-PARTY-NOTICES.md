@@ -2,7 +2,7 @@
 
 MicroGlow Relay includes or depends on the third-party components listed below.
 Each component remains under its own license. Full license texts are stored in
-[`docs/licenses/`](docs/licenses/).
+[`docs/licenses/`](licenses/).
 
 ## Runtime dependencies (Windows application)
 

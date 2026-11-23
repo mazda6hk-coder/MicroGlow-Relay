@@ -19,7 +19,7 @@ from urllib.parse import urlsplit, urlunsplit
 
 
 APP_NAME = "MicroGlow Relay"
-VERSION = "1.0"
+VERSION = "1.3"
 ROUTER_MODEL = "microglow-relay"
 # 形状教训缓存有效期：7 天。Codex/上游修复后自动过期，避免长期套用旧降级。
 SHAPE_LESSON_TTL = 7 * 24 * 3600

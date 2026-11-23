@@ -1,5 +1,5 @@
-{ Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center }
-{ SPDX-License-Identifier: Apache-2.0 }
+; Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+; SPDX-License-Identifier: Apache-2.0
 { Shared by the production installer and the isolated Pascal persistence probe. }
 procedure SaveStatisticsConsent(ConsentPath: String; AllowStatistics: Boolean);
 var

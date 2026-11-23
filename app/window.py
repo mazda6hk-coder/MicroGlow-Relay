@@ -6,9 +6,10 @@ from __future__ import annotations
 from ctypes import POINTER, cast
 from ctypes.wintypes import MSG
 
-from PySide6.QtCore import (QEasingCurve, QPoint, QPropertyAnimation, QRectF, QSize,
-                            Qt, QTimer, Slot)
-from PySide6.QtGui import QColor, QCursor, QFont, QFontMetrics, QGuiApplication, QIcon
+from PySide6.QtCore import (QEasingCurve, QEvent, QPoint, QPropertyAnimation, QRectF,
+                            QSize, Qt, QTimer, Slot)
+from PySide6.QtGui import (QColor, QCursor, QFont, QFontMetrics, QGuiApplication, QIcon,
+                           QPainterPath, QRegion)
 from PySide6.QtWidgets import (
     QApplication,
     QButtonGroup,
@@ -260,6 +261,8 @@ class Shell(QWidget):
 
     BORDER_WIDTH = 6
     VISIBLE_CANVAS = QRectF(22, 4, 1296, 880)
+    # 无边框窗口的四角圆角半径：只裁窗口外形，不动布局与缩放手势判定。
+    ROUND_RADIUS = 10
 
     def __init__(self, bridge):
         super().__init__()
@@ -279,6 +282,8 @@ class Shell(QWidget):
 
         self.setWindowTitle(APP_NAME)
         self.setWindowFlags(Qt.FramelessWindowHint)
+        # 圆角需要逐像素透明：外壳透明，由 canvas_view 的圆角遮罩裁出窗口外形。
+        self.setAttribute(Qt.WA_TranslucentBackground)
         # 任务书第 1 节：最小宽度 1100px（顶栏要放下品牌+四标签+右侧控件）。
         self.setMinimumSize(1005, 675)
         available = QGuiApplication.primaryScreen().availableGeometry()
@@ -322,6 +327,7 @@ class Shell(QWidget):
         self.bridge.io_changed.connect(self._on_io_changed)
         self._sync_tray()
         self._center()
+        self._apply_round_mask()
         QGuiApplication.styleHints().colorSchemeChanged.connect(self._system_color_changed)
 
     def _system_color_changed(self, *_args):
@@ -340,6 +346,31 @@ class Shell(QWidget):
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self._fit_canvas()
+        self._apply_round_mask()
+
+    def changeEvent(self, event):
+        super().changeEvent(event)
+        if event.type() == QEvent.WindowStateChange:
+            self._apply_round_mask()
+
+    def _apply_round_mask(self) -> None:
+        """把主窗口四个直角裁成 ROUND_RADIUS 圆角；最大化/全屏时恢复方形。
+
+        Shell 自身的 mask 只作用于真实窗口外形。离屏渲染（QWidget.grab）不裁
+        被 grab 控件自己的 mask，所以同一形状也要设在 canvas_view 上，
+        由子控件按圆角裁切，截图与真机才会一致。
+        """
+        rounded = not (self.isMaximized() or self.isFullScreen())
+        for widget in (self, getattr(self, "canvas_view", None)):
+            if widget is None:
+                continue
+            rect = QRectF(widget.rect())
+            if not rounded or rect.isEmpty():
+                widget.clearMask()
+                continue
+            path = QPainterPath()
+            path.addRoundedRect(rect, self.ROUND_RADIUS, self.ROUND_RADIUS)
+            widget.setMask(QRegion(path.toFillPolygon().toPolygon()))
 
     # ------------------------------------------------------------------ pages
     def _build_pages(self) -> None:

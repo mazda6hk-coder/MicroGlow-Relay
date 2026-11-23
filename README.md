@@ -4,10 +4,10 @@
 
 Documentation site: https://mazda6hk-coder.github.io/MicroGlow-Relay/
 
-**[**Download Relay 1.0 for Windows**](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.0)
+**[**Download Relay 1.3 for Windows**](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.3)
 · [Source](#from-source) · [Docs](https://mazda6hk-coder.github.io/MicroGlow-Relay/)**
 <sub>Unsigned installer: Windows may show a SmartScreen warning. Verify the SHA-256 on the
-[release page](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.0).</sub>
+[release page](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.3).</sub>
 
 A local AI model gateway for Windows. Relay listens on `127.0.0.1:4141` and lets
 Codex (OpenAI Responses) and Claude Code (Anthropic Messages) reach third-party
@@ -17,7 +17,7 @@ channel failover handled quietly.
 [![Platform](https://img.shields.io/badge/platform-Windows%20x64-4a5a68?style=flat-square)](#platform-and-requirements)
 [![License](https://img.shields.io/badge/license-Apache--2.0-4a5a68?style=flat-square)](LICENSE)
 [![Languages](https://img.shields.io/badge/interface-8%20languages-4a5a68?style=flat-square)](#interface)
-[![Version](https://img.shields.io/badge/version-1.0-4a5a68?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.3-4a5a68?style=flat-square)](CHANGELOG.md)
 
 <img src="docs/images/social-preview-1280x640.png" alt="MicroGlow Relay — use third-party models in Codex and Claude Code" width="100%">
 
@@ -44,7 +44,7 @@ resets.
 ## Install
 
 Download the installer from the
-[Releases page](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.0),
+[Releases page](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.3),
 or install it with the Windows Package Manager:
 
 ```powershell
@@ -53,7 +53,7 @@ winget install MicroGlow.MicroGlowRelay
 
 The installer is not code-signed, so Windows may show a SmartScreen prompt.
 Verify the download against
-[SHA256SUMS.txt](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/download/v1.0/SHA256SUMS.txt).
+[SHA256SUMS.txt](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/download/v1.3/SHA256SUMS.txt).
 
 ## Quick start
 
@@ -172,7 +172,11 @@ Full texts: [Privacy policy](docs/PRIVACY-POLICY.md),
   Español, 한국어. The installer itself is English/Simplified Chinese only.
 - **8 skins:** spring / summer / autumn / winter, each with a day and a night
   palette. Default is spring, day.
-- **Linux is not supported in this release.**
+- **Linux (preview).** A `.deb` and a standalone ELF build are published with
+  each release. They are preview builds: not yet covered by full regression
+  testing, and they require an unlocked system keyring (Secret Service) to store
+  API keys. The source tree in this repository is the Windows application; the
+  Linux build is produced from a separate tree that is not yet published here.
 
 ## Build from source
 
@@ -224,14 +228,17 @@ source uses `data` in the project folder; `--data-dir` overrides it.
 It is not code-signed yet. Verify the published checksum.
 
 **Is Linux supported?**
-Not in this release.
+A preview `.deb` and ELF build are published with each release. They are not yet
+regression-tested to the same standard as Windows, and they need an unlocked
+Secret Service keyring. The source published here is the Windows tree; the Linux
+tree is not yet in this repository.
 
 ## Roadmap
 
 Planned, not released. Listed here so that nobody mistakes a plan for a feature:
 
 - Cross-model session continuation.
-- Linux regression testing and a Linux release, if it passes.
+- Linux regression testing, and publishing the Linux source tree in this repository.
 - Code signing for the installer.
 - A packaging review for LGPL obligations (see `THIRD_PARTY_NOTICES.md`).
 

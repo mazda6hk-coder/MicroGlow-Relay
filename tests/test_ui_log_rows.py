@@ -27,6 +27,7 @@ from storage import Settings  # noqa: E402
 
 from app import theme  # noqa: E402
 from app.bridge import Bridge  # noqa: E402
+from app import final_views  # noqa: E402
 from app.i18n import set_language  # noqa: E402
 from app.window import Shell  # noqa: E402
 
@@ -90,11 +91,10 @@ class LogRowTests(unittest.TestCase):
 
     def test_single_line_rows_are_dense(self):
         widget = self._render([SHORT_EVENT] * 8)
-        line = widget.fontMetrics().height()
         hints = [widget.item(index).sizeHint().height() for index in range(widget.count())]
         for hint in hints:
-            self.assertEqual(hint, line + self.page.LOG_ROW_EXTRA, "单行日志应压到一行的高度")
-            self.assertLessEqual(hint, 26, "单行高度应明显低于回归前的 52px")
+            self.assertEqual(hint, final_views.LOG_ROW_HEIGHT, "单行日志应压到固定的一行高度")
+            self.assertLessEqual(hint, 32, "单行高度应明显低于回归前的 52px")
         self.assertEqual(widget.spacing(), 0)
 
     def test_request_row_names_the_routed_model(self):
@@ -115,8 +115,30 @@ class LogRowTests(unittest.TestCase):
         probe = self._render([SHORT_EVENT])
         width = probe.fontMetrics().horizontalAdvance(probe.item(0).text()) + 40
         widget = self._render([SHORT_EVENT, LONG_EVENT], width=width)
-        self.assertEqual(widget.item(0).sizeHint().height(), widget.fontMetrics().height() + self.page.LOG_ROW_EXTRA)
-        self.assertEqual(widget.item(1).sizeHint().height(), -1, "长报错必须交回自动换行高度，不能被截断")
+        # 列表最新在上：第二个事件（长报错）应排在第 0 行。
+        self.assertEqual(widget.item(0).data(final_views.LOG_MESSAGE_ROLE), LONG_EVENT["message"])
+        self.assertGreater(widget.item(0).sizeHint().height(), final_views.LOG_ROW_HEIGHT,
+                           "长报错必须换成多行高度，不能被截断")
+        self.assertEqual(widget.item(1).sizeHint().height(), final_views.LOG_ROW_HEIGHT)
+
+    def test_append_is_incremental(self):
+        """新事件只插入一行，既有行不重建（这一条是卡顿回归的护栏）。"""
+        self.bridge.events.clear()
+        self.bridge.events.extend([dict(SHORT_EVENT, time=f"22:0{index}:00") for index in range(5)])
+        self.page._render_all()
+        self._process()
+        widget = self.page.list_widget
+        before = widget.count()
+        self.assertEqual(before, 5)
+        anchor = widget.item(before - 1).data(final_views.LOG_EVENT_ROLE)
+        fresh = dict(SHORT_EVENT, time="23:00:00")
+        self.bridge.events.append(fresh)
+        self.page._append([fresh])
+        self._process()
+        self.assertEqual(widget.count(), before + 1)
+        self.assertEqual(widget.item(0).data(final_views.LOG_TIME_ROLE), "23:00:00")
+        self.assertEqual(widget.item(widget.count() - 1).data(final_views.LOG_EVENT_ROLE), anchor,
+                         "旧行必须原地保留，不能被 clear() 重建")
 
 
 if __name__ == "__main__":

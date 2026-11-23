@@ -117,7 +117,7 @@ class LogsReferenceTests(UiTestCase):
     def test_donut_uses_surface_hole_without_changing_counts(self):
         page = self.shell.pages["logs"]
         chart = page.share_chart
-        chart.set_data(summary()["models"], {}, 385)
+        chart.set_data(summary()["models"], "requests", 385)
         chart.resize(420, 240)
         image = chart.grab().toImage()
         self.assertEqual(image.pixelColor(104, 90).name(), theme.current.surface.lower())

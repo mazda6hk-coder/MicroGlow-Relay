@@ -31,7 +31,9 @@ class AboutReleaseTests(UiTestCase):
             self.assertTrue(matching[0].isEnabled())
         from PySide6.QtWidgets import QLabel
         text = " ".join(w.text() for w in page.about_card.findChildren(QLabel))
-        self.assertIn("ChatGPT · Codex", text)
+        # 关于卡改版后品牌行由 BrandMark + 富文本拼成，旧的“ChatGPT · Codex”
+        # 副标题不再随卡展示；产品名与团队署名仍需可见。
+        self.assertIn("Relay", text)
         self.assertIn("郑州微光智能科技中心", text)
         with patch("PySide6.QtGui.QDesktopServices.openUrl") as open_url:
             page.open_feedback()

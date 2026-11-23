@@ -28,7 +28,7 @@ from storage import (APP_NAME, ENDPOINT_SUFFIXES, ROUTER_MODEL, VERSION,
                     is_retired_router_model, redact)
 from channels import ChannelRouter
 from model_names import resolve_friendly
-from native_models import is_native_slug, resolve_native_target
+from native_models import is_native_slug, native_profile, resolve_native_target
 from telemetry import (
     HttpTelemetryUploadClient,
     TelemetryRuntime,
@@ -205,6 +205,19 @@ IMAGE_UPSTREAM_TIMEOUT_SECONDS = 240.0
 # 「完整生成端点 → 站根」的识别表，供 /models 发现用；图像端点也在内。
 TEXT_AND_IMAGE_SUFFIXES = ("/chat/completions", "/responses", "/messages",
                            "/images/generations", "/images/edits")
+# 原生直通要跟着 Codex 自己的请求头走：官方后端按这些头识别会话与功能开关，
+# 换掉轻则降级，重则拒收。
+NATIVE_PASSTHROUGH_HEADERS = (
+    "x-codex-beta-features",
+    "x-codex-window-id",
+    "x-codex-turn-metadata",
+    "x-openai-internal-codex-responses-lite",
+    "x-client-request-id",
+    "session-id",
+    "thread-id",
+    "originator",
+    "user-agent",
+)
 # 上游并发上限：每条长流会占满一个槽位直到结束。
 MAX_UPSTREAM_CONCURRENCY = 16
 SLOT_WAIT_SECONDS = 30.0
@@ -463,7 +476,11 @@ def _upstream_stream(client, profile: dict, payload: dict, deadline: float, on_r
                 if 200 <= upstream.status_code < 300:
                     # 非 SSE 的 200 必须在预取之前排除：它的 body 不是事件流，
                     # 预取只会读到 EOF 并把一个干净的 502 退化成传输层重试。
-                    if "text/event-stream" not in upstream.headers.get("Content-Type", "").lower():
+                    # ChatGPT 官方后端不回 Content-Type（实测 200 + 裸 SSE），
+                    # 原生直通不能拿这个头做判据。
+                    content_type = upstream.headers.get("Content-Type", "").lower()
+                    if ("text/event-stream" not in content_type
+                            and not profile.get("_native_passthrough")):
                         upstream.read()
                         raise ProtocolFailure("上游 HTTP 200，但没有返回 SSE 流。", 502, "not_sse")
                     lines = upstream.iter_lines()
@@ -557,6 +574,19 @@ def _upstream_stream(client, profile: dict, payload: dict, deadline: float, on_r
 
 
 def upstream_headers(profile: dict) -> dict:
+    if profile.get("_native_passthrough"):
+        # 认证用本机 Codex 的登录态；客户端头原样带上，让官方后端看到的
+        # 就是 Codex 自己发的请求。Relay 只换出口，不改会话身份。
+        auth = profile.get("_native_auth") or {}
+        client = profile.get("_client_headers") or {}
+        headers = {"Accept": "text/event-stream", "Content-Type": "application/json"}
+        for name in NATIVE_PASSTHROUGH_HEADERS:
+            value = client.get(name)
+            if value:
+                headers[name] = value
+        headers["Authorization"] = "Bearer " + str(auth.get("access_token") or "")
+        headers["chatgpt-account-id"] = str(auth.get("account_id") or "")
+        return headers
     headers = {
         "Accept": "text/event-stream",
         "Content-Type": "application/json",
@@ -587,6 +617,12 @@ def upstream_error(response: httpx.Response, profile: dict) -> ProtocolFailure:
     except Exception:
         pass
     title = ERROR_HINTS.get(status, "供应商拒绝请求")
+    if profile.get("_native_passthrough"):
+        # 直通没有 API Key 可改：401/403 只能是登录态问题，别把用户引向配置页。
+        if status == 401:
+            title = "Codex 登录态已失效，请在 Codex 中重新登录"
+        elif status == 403:
+            title = "Codex 登录态无权访问该原生模型（可能套餐未包含）"
     if status == 400 and _transient_400_error(detail):
         # 上游把自己「临时故障」包成 400：别再用「参数不兼容」把用户赶去改配置。
         title = TRANSIENT_400_HINT
@@ -1029,8 +1065,21 @@ class Handler(BaseHTTPRequestHandler):
                 # （adapters.py:238 / 295 / 665），所以不用改 adapters。
                 profile["model"] = model
                 return profile
+            # 没有同名配置时走官方直通：认证用本机 Codex 登录态，
+            # 请求头跟着客户端走（会话/线程/功能开关都在里面）。
+            direct = native_profile(model)
+            if direct is not None:
+                incoming = getattr(self, "headers", None)
+                if incoming is not None:
+                    direct["_client_headers"] = {
+                        name: incoming.get(name)
+                        for name in NATIVE_PASSTHROUGH_HEADERS
+                        if incoming.get(name)
+                    }
+                return direct
             raise ProtocolFailure(
-                "Codex 原生模型 %s 没有可用的透传配置。请在 Relay 中添加一个模型名为 %s 的配置。"
+                "Codex 原生模型 %s 不可用：本机没有 ChatGPT 登录态，也没有同名 Relay 配置。"
+                "请先在 Codex 登录，或在 Relay 中添加一条模型名为 %s 的配置。"
                 % (str(model)[:120], str(model)[:120]),
                 404, "native_model_unconfigured") from None
         # 已删除/未知的模型 id 同样属于请求侧错误，按 404 归类，

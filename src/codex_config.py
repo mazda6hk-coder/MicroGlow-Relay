@@ -13,7 +13,8 @@ import tomlkit
 
 from storage import APP_NAME, REASONING_VALUES, ROUTER_MODEL, atomic_write
 from model_names import friendly_slug
-from native_models import NATIVE_MODELS, resolve_native_target
+from native_models import (NATIVE_MODELS, native_catalog_entry,
+                           native_passthrough_available, resolve_native_target)
 
 
 PROVIDER_ID = "microglow_relay"
@@ -39,25 +40,33 @@ def codex_home() -> Path:
 
 
 def model_catalog(settings) -> dict:
-    """为 Codex 导出「默认项 + 每个 profile 一条 + 可用原生模型」的模型目录。
+    """为 Codex 导出按供应商分块的模型目录（profile 条目 + 原生模型）。
 
     slug 用友好名（model_names.py）：人类可读、与 Claude /model 共用；
     配置 id 仍被网关按原样接受（解析链：id → 友好名 → 原生 slug → 404），
     旧会话里写的 id 不会失效。Codex /model 选中哪条，后续请求的
     model 字段就是哪个 slug，切换只影响当前会话（Codex 侧语义），天然按会话隔离。
-    原生条目（宽松 B′）：Codex 的 model_catalog_json 是整体替换语义，
-    Relay 一接入原生表就被换掉了；这里按 native_models 的快照把它们并回来，
-    且只在 resolve_native_target() 命中时才导。详见 src/native_models.py。
+    原生条目：Codex 的 model_catalog_json 是整体替换语义，Relay 一接入原生表
+    就被换掉了；这里把 Codex 自己那份完整条目（含系统提示词）并回来。没有出口
+    的原生条目不导出——点了必 404 的按钮比没有更糟。详见 src/native_models.py。
     """
     profiles = settings.profiles()
-    entries = [_router_entry(profiles)]
+    # 渠道全部关闭的模型不进目录：选择器里不放点了必失败的选项。
+    enabled = [profile for profile in profiles
+               if not ((profile.get("channels") or [])
+                       and not any(channel.get("enabled", True)
+                                   for channel in profile["channels"]))]
+    # 按供应商分块：块序 = 供应商在设置里首次出现的顺序，块内按模型名排序。
+    # Codex 的选择器是平铺列表，没有分组/子菜单；连续排列 + 统一前缀是唯一
+    # 能表达「分组」的手段（客户端 schema 无 group/section 字段）。
+    block_order: dict[str, int] = {}
+    for profile in enabled:
+        block_order.setdefault(_provider_name(profile), len(block_order))
+    enabled.sort(key=lambda profile: (block_order[_provider_name(profile)],
+                                      str(profile.get("model") or "").lower()))
+    entries: list[dict] = []
     seen: dict[str, int] = {}
-    for profile in profiles:
-        # 渠道全部关闭的模型不再进入 Codex 可选列表：选择器里不放假选项。
-        # 单渠道 profile 的开关存在 channels[0].enabled；无 channels 视为启用。
-        channels = profile.get("channels") or []
-        if channels and not any(c.get("enabled", True) for c in channels):
-            continue
+    for profile in enabled:
         label = _profile_label(profile)
         if seen.get(label):
             label = f"{label}（{int(profile['input_tokens']) // 1000}K）"
@@ -65,18 +74,24 @@ def model_catalog(settings) -> dict:
         entries.append(_profile_entry(profile, label,
                                       slug=friendly_slug(profile, profiles)))
     taken = {friendly_slug(p, profiles) for p in profiles} | {ROUTER_MODEL}
+    native_direct = native_passthrough_available()
     for native in NATIVE_MODELS:
-        # 只在确实存在透传目标时才导出：选择器里不放假选项。
-        # 用户新加一个 model 等于原生 slug 的配置后，
-        # refresh_catalog_if_active() 会自动把对应条目放出来。
-        if resolve_native_target(profiles, native["slug"]) is None:
-            continue
         if native["slug"] in taken:
-            # 同名配置的友好 slug 已经占了这个名字：两条目录指向同一目标，
-            # 再导出原生条目就是重复项（Codex 要求 slug 唯一）。
+            # 同名配置的友好 slug 已经占了这个名字：再导出原生条目就是重复项
+            # （Codex 要求 slug 唯一）。
             continue
-        entries.append(_native_entry(native))
+        routed = resolve_native_target(profiles, native["slug"]) is not None
+        if not routed and not native_direct:
+            # 没有出口的原生条目是「点了必 404」的死按钮。Codex 的
+            # visibility="hide" 不可靠（openai/codex#36215 实测仍会显示），
+            # 唯一可靠的做法是不写进目录。
+            continue
+        entries.append(_native_entry(native, routed=routed,
+                                     direct=native_direct and not routed))
 
+    if not entries:
+        # 一个可用模型都没有：保留「跟随」项，避免选择器空白。
+        entries.append(_router_entry(profiles))
     return {"models": entries}
 
 
@@ -119,7 +134,7 @@ def _entry(*, slug: str, display_name: str, description: str,
 
 
 def _router_entry(profiles: list[dict]) -> dict:
-    """默认项：跟随 Relay 当前选中（兼容桌面端选中态与旧习惯）。"""
+    """兜底项：目录里一个 profile 都没有时才导出（跟随 Relay 当前选中）。"""
     context = min([profile["input_tokens"] for profile in profiles] or [128_000])
     images = any(profile.get("image_input") for profile in profiles)
     return _entry(
@@ -129,6 +144,28 @@ def _router_entry(profiles: list[dict]) -> dict:
         context_window=context,
         images=images,
     )
+
+
+def _default_slug(settings, profiles: list[dict]) -> str:
+    """导出配置的默认模型：优先当前选中项，其次第一个可用 profile。"""
+    enabled = [profile for profile in profiles
+               if not (profile.get("channels")
+                       and not any(channel.get("enabled", True) for channel in profile["channels"]))]
+    try:
+        selected = settings.selected()
+    except ValueError:
+        selected = None
+    if selected:
+        for profile in enabled:
+            if profile["id"] == selected["id"]:
+                return friendly_slug(profile, profiles)
+    if enabled:
+        return friendly_slug(enabled[0], profiles)
+    # 一个 profile 都没有、但本机登录了 Codex：默认模型落到第一条原生条目。
+    # 否则配置里会写一个目录中不存在的 ROUTER_MODEL，Codex 启动即报错。
+    if native_passthrough_available():
+        return NATIVE_MODELS[0]["slug"]
+    return ROUTER_MODEL
 
 
 def _profile_entry(profile: dict, display_name: str = "", slug: str = "") -> dict:
@@ -148,23 +185,45 @@ def _profile_entry(profile: dict, display_name: str = "", slug: str = "") -> dic
     )
 
 
-def _native_entry(native: dict) -> dict:
-    """Codex 原生模型条目（宽松 B′）。
+def _native_entry(native: dict, *, routed: bool, direct: bool) -> dict:
+    """Codex 原生模型条目。
 
-    上下文窗口取快照里的保守值 272K，不放大到原生的 872K 上限——
-    透传目标可能是只吃 272K 的中转站，提前 auto-compact 比上游报错好。
+    优先使用 Codex 自己那份完整条目：系统提示词、推理档位、工具形态都写在
+    条目里，手写一份短条目不叫直通，叫降级。数据文件缺失时才退回快照字段。
+
+    ``routed`` 走 Relay 里的同名配置（跨供应商时推理链降级为文本）；
+    ``direct`` 走官方直通（推理链完整）。
     """
-    return _entry(
-        slug=native["slug"],
-        display_name=native["display_name"],
-        description=native["description"],
-        context_window=native["context_window"],
-        images=native["images"],
-        default_effort=native["default_effort"],
+    base = native_catalog_entry(native["slug"])
+    if base is not None:
+        entry = json.loads(json.dumps(base))      # 深拷贝，别让调用方改到缓存
+    else:
+        entry = _entry(
+            slug=native["slug"],
+            display_name=native["display_name"],
+            description=native["description"],
+            context_window=native["context_window"],
+            images=native["images"],
+            default_effort=native["default_effort"],
+        )
+    entry["slug"] = native["slug"]
+    entry["display_name"] = f"原生｜{native['display_name']}"
+    entry["visibility"] = "list"
+    entry["description"] = (
+        "Codex 原生模型 · 直通本机 ChatGPT 登录态（推理链完整）。"
+        if direct else
+        "Codex 原生模型 · 经 Relay 同名配置透传（跨供应商时推理链降级为文本）。"
     )
+    return entry
+
+
+def _provider_name(profile: dict) -> str:
+    return str(profile.get("provider_name") or profile.get("provider") or "").strip()
+
+
 def _profile_label(profile: dict) -> str:
-    """「供应商 · 模型」；同供应商同模型的重复名追加上下文窗口区分。"""
-    base = f'{profile.get("provider_name") or ""} · {profile.get("model") or ""}'.strip(" ·")
+    """「供应商｜模型」；同供应商同模型的重复名追加上下文窗口区分。"""
+    base = f"{_provider_name(profile)}｜{profile.get('model') or ''}".strip("｜")
     return base[:80]
 
 
@@ -196,7 +255,7 @@ def export_files(settings) -> tuple[Path, Path]:
     atomic_write(catalog_path, json.dumps(model_catalog(settings), ensure_ascii=False, indent=2))
     document = tomlkit.document()
     document["model_provider"] = PROVIDER_ID
-    document["model"] = ROUTER_MODEL
+    document["model"] = _default_slug(settings, settings.profiles())
     document["model_catalog_json"] = str(catalog_path)
     document["web_search"] = "disabled"
     document["model_providers"] = {PROVIDER_ID: provider_config(settings)}
@@ -332,7 +391,7 @@ def integrate(settings, target: Path | None = None, force: bool = False) -> Path
     _, catalog_path = export_files(settings)
     replacements = {
         "model_provider": PROVIDER_ID,
-        "model": ROUTER_MODEL,
+        "model": _default_slug(settings, settings.profiles()),
         "model_catalog_json": str(catalog_path),
         "web_search": "disabled",
     }

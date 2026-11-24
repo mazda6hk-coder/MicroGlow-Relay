@@ -25,8 +25,12 @@ def slugify(text) -> str:
     return cleaned
 
 
-def friendly_slug(profile: dict, profiles: list) -> str:
-    """一条配置的友好 slug；同名模型并存时追加 id 尾缀消歧。"""
+def compute_slug(profile: dict, profiles: list) -> str:
+    """按当前规则算一个 slug（同名模型冲突时追加 id 尾缀）。
+
+    只在**首次**给配置定名时使用；定名后写进 ``profile["slug"]`` 并永久冻结，
+    之后的增删孪生、改模型名都不再重算——否则历史会话里记着的 slug 会失效。
+    """
     base = slugify(profile.get("model")) or "model"
     twins = [p for p in profiles
              if (slugify(p.get("model")) or "model") == base]
@@ -34,6 +38,30 @@ def friendly_slug(profile: dict, profiles: list) -> str:
         return base
     suffix = str(profile.get("id") or "")[-4:]
     return f"{base}-{suffix}" if suffix else base
+
+
+def assign_slug(profile: dict, others: list) -> str:
+    """给一条新配置定名，并保证不与其它配置重名。
+
+    ``others`` 是同级的其它配置（不含本条）。冲突时追加 ``-2``、``-3``……
+    这只影响新建的配置；已有配置的 slug 永远不会被改动。
+    """
+    base = compute_slug(profile, list(others) + [profile])
+    taken = {str(p.get("slug") or "") for p in others}
+    if base not in taken:
+        return base
+    index = 2
+    while f"{base}-{index}" in taken:
+        index += 1
+    return f"{base}-{index}"
+
+
+def friendly_slug(profile: dict, profiles: list) -> str:
+    """配置在目录里对外的名字：定过名就用定下来的那个，永不重算。"""
+    stored = str(profile.get("slug") or "").strip()
+    if stored:
+        return stored
+    return compute_slug(profile, profiles)
 
 
 def resolve_friendly(profiles: list, slug: str):

@@ -17,9 +17,11 @@ import threading
 import uuid
 from urllib.parse import urlsplit, urlunsplit
 
+from model_names import assign_slug
+
 
 APP_NAME = "MicroGlow Relay"
-VERSION = "1.3"
+VERSION = "1.4"
 ROUTER_MODEL = "microglow-relay"
 # 形状教训缓存有效期：7 天。Codex/上游修复后自动过期，避免长期套用旧降级。
 SHAPE_LESSON_TTL = 7 * 24 * 3600
@@ -257,6 +259,8 @@ def validate_profile(profile: dict, *, require_custom_name: bool = True) -> dict
     result["reasoning_effort"] = effort if effort in REASONING_LEVELS else "中"
     echo = str(result.get("reasoning_echo") or "auto").strip().lower()
     result["reasoning_echo"] = echo if echo in REASONING_ECHO_LEVELS else "auto"
+    slug = str(result.get("slug") or "").strip()
+    result["slug"] = slug[:80] if slug else ""
     result["id"] = str(result.get("id") or "")
     return result
 
@@ -278,6 +282,12 @@ class Settings:
                     for profile in data["profiles"]
                 ]
                 self.data = data
+                # 1.4 起 slug 是定名后冻结的存储值；旧配置首次加载时补一次。
+                if self._backfill_slugs():
+                    try:
+                        self.save()
+                    except Exception:  # noqa: BLE001 - 补名失败不挡住启动
+                        pass
             except Exception as error:
                 raise RuntimeError(f"新版配置无法读取，原文件已保留：{self.path}") from error
         else:
@@ -383,6 +393,13 @@ class Settings:
                 for order, clean in enumerate(cleaned):
                     current = next((p for p in self.data["profiles"] if p["id"] == clean.get("id")), None)
                     clean["id"] = current["id"] if current else "model-" + uuid.uuid4().hex[:12]
+                    if current and str(current.get("slug") or "").strip():
+                        # 已有配置：名字一经定下就不再重算。
+                        clean["slug"] = str(current["slug"]).strip()
+                    else:
+                        others = [p for p in self.data["profiles"]
+                                  if p["id"] != clean["id"]]
+                        clean["slug"] = assign_slug(clean, others)
                     clean["secret"] = protect(api_key) if api_key is not None else (current.get("secret", "") if current else "")
                     # 渠道 key 与渠道一一对应地加密保存；None 表示「不动现有密钥」，
                     # 与主 key 的语义一致（编辑配置不填 key = 保留旧 key）。
@@ -449,6 +466,9 @@ class Settings:
                         self.data["profiles"] = [own if p["id"] == profile_id else p for p in self.data["profiles"]]
                     else:
                         own["id"] = "model-" + uuid.uuid4().hex[:12]
+                        used = {str(p.get("slug") or "") for p in self.data["profiles"]}
+                        if str(own.get("slug") or "") in used:
+                            own["slug"] = assign_slug(own, self.data["profiles"])
                         self.data["profiles"].append(own)
                         if order == 0:
                             channels.pop(index); secrets.pop(index)
@@ -482,6 +502,29 @@ class Settings:
         with self.lock:
             self.data["port"] = port
             self.save()
+
+    def _backfill_slugs(self) -> bool:
+        """给还没有名字的历史配置补一个 slug；返回是否有改动。
+
+        补出来的名字与 1.3 的算法一致，因此升级前后的会话不会错位；
+        补一次之后即冻结，后续增删孪生不再影响它。
+        """
+        profiles = self.data.get("profiles") or []
+        taken = {str(p.get("slug") or "") for p in profiles if p.get("slug")}
+        changed = False
+        for profile in profiles:
+            if str(profile.get("slug") or "").strip():
+                continue
+            others = [p for p in profiles if p is not profile]
+            slug = assign_slug(profile, others)
+            index = 2
+            while slug in taken:
+                slug = assign_slug(profile, others) + f"-{index}"
+                index += 1
+            profile["slug"] = slug
+            taken.add(slug)
+            changed = True
+        return changed
 
     @staticmethod
     def _public(profile: dict) -> dict:

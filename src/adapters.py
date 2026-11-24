@@ -687,6 +687,69 @@ def apply_lessons(payload: dict, actions) -> tuple:
     return result, True
 
 
+AGENT_MESSAGE_TEXT_PARTS = ("input_text", "text")
+
+
+def agent_message_text(item: dict) -> str:
+    """把 Codex 多智能体的 ``agent_message`` 折成纯文本。
+
+    ``content`` 里既可能是 ``input_text``，也可能是 ``encrypted_content`` 分片
+    ——后者的 ``encrypted_content`` 字段实际装的是明文任务书（实测），一并取用；
+    其余未知分片整体跳过，保证第三方上游只看到能理解的文本。
+    """
+    parts = []
+    content = item.get("content")
+    if isinstance(content, list):
+        for part in content:
+            if isinstance(part, str):
+                if part.strip():
+                    parts.append(part)
+                continue
+            if not isinstance(part, dict):
+                continue
+            kind = part.get("type")
+            if kind in AGENT_MESSAGE_TEXT_PARTS:
+                value = part.get("text")
+            elif kind == "encrypted_content":
+                value = part.get("encrypted_content")
+            else:
+                value = part.get("text")
+            if isinstance(value, str) and value.strip():
+                parts.append(value)
+    body = "\n".join(part.strip() for part in parts if part.strip())
+    header = []
+    author = str(item.get("author") or "").strip()
+    recipient = str(item.get("recipient") or "").strip()
+    if author:
+        header.append("发件会话：" + author)
+    if recipient:
+        header.append("收件会话：" + recipient)
+    if not header:
+        return body
+    return "\n".join(header + (["", body] if body else []))
+
+
+def flatten_agent_messages(items: list) -> tuple:
+    """把 ``agent_message`` 输入项折成普通 ``message``。
+
+    Codex 的多智能体用这个私有类型派工/回执；第三方上游（chat / responses /
+    anthropic）都不认识它。折成一条 user 消息后语义不变、元数据不影响送达。
+    返回 (新列表, 是否有改动)。
+    """
+    if not isinstance(items, list):
+        return items, False
+    out = []
+    changed = False
+    for item in items:
+        if isinstance(item, dict) and item.get("type") == "agent_message":
+            out.append({"type": "message", "role": "user",
+                        "content": [{"type": "input_text", "text": agent_message_text(item)}]})
+            changed = True
+            continue
+        out.append(item)
+    return out, changed
+
+
 def _chat_messages(body: dict, tools: ToolNames, profile: dict, reasoning_cache=None) -> list[dict]:
     source = body.get("input", "")
     if isinstance(source, str):
@@ -752,6 +815,9 @@ def _chat_messages(body: dict, tools: ToolNames, profile: dict, reasoning_cache=
                     "tool_call_id": str(item.get("call_id") or ""),
                     "content": output if isinstance(output, str) else compact_json(output),
                 })
+                continue
+            if kind == "agent_message":
+                messages.append({"role": "user", "content": agent_message_text(item)})
                 continue
             raise ProtocolFailure(f"暂不支持的 input 类型：{kind}")
     instructions = body.get("instructions")
@@ -1290,6 +1356,9 @@ def prepare_request(body: dict, profile: dict, reasoning_cache=None):
         # 只作用于本次请求副本，绝不改写调用方的 body 与本地历史。
         body = dict(body)
         body["input"] = sanitize_orphan_outputs(body["input"])
+        # Codex 多智能体的 agent_message 是私有输入类型：第三方上游不认识它，
+        # 官方 Responses 也不收它的 encrypted_content 分片。统一折成普通消息。
+        body["input"], _agent_flattened = flatten_agent_messages(body["input"])
     if isinstance(body.get("tools"), list):
         # 第 3+2 层：已知不兼容工具形状快洗 + 未知载体兜底收敛。
         body = dict(body)

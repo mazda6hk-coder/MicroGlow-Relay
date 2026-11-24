@@ -4,10 +4,10 @@
 
 文档站：https://mazda6hk-coder.github.io/MicroGlow-Relay/
 
-**[**下载 Relay 1.3（Windows）**](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.3)
+**[**下载 Relay 1.4（Windows）**](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.4)
 · [源码](#从源码构建) · [文档](https://mazda6hk-coder.github.io/MicroGlow-Relay/)**
 <sub>安装包未签名：Windows 可能出现 SmartScreen 提示，请到
-[发布页](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.3)核对 SHA-256。</sub>
+[发布页](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.4)核对 SHA-256。</sub>
 
 面向 Windows 的本地 AI 模型网关。Relay 监听 `127.0.0.1:4141`，让 Codex（OpenAI
 Responses）与 Claude Code（Anthropic Messages）通过同一个本地入口使用第三方模型：
@@ -16,7 +16,7 @@ Responses）与 Claude Code（Anthropic Messages）通过同一个本地入口�
 [![平台](https://img.shields.io/badge/platform-Windows%20x64-4a5a68?style=flat-square)](#平台与要求)
 [![许可证](https://img.shields.io/badge/license-Apache--2.0-4a5a68?style=flat-square)](LICENSE)
 [![语言](https://img.shields.io/badge/interface-8%20languages-4a5a68?style=flat-square)](#界面)
-[![版本](https://img.shields.io/badge/version-1.3-4a5a68?style=flat-square)](CHANGELOG.md)
+[![版本](https://img.shields.io/badge/version-1.4-4a5a68?style=flat-square)](CHANGELOG.md)
 
 <img src="docs/images/social-preview-1280x640.png" alt="MicroGlow Relay — 把第三方模型，接进 Codex 与 Claude Code" width="100%">
 
@@ -37,7 +37,7 @@ Responses）与 Claude Code（Anthropic Messages）通过同一个本地入口�
 
 ## 安装
 
-从 [Releases 页面](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.3)
+从 [Releases 页面](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.4)
 下载安装包，或用 Windows 包管理器安装：
 
 ```powershell
@@ -45,7 +45,7 @@ winget install MicroGlow.MicroGlowRelay
 ```
 
 安装包未做代码签名，Windows 可能显示 SmartScreen 提示。请用
-[SHA256SUMS.txt](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/download/v1.3/SHA256SUMS.txt)
+[SHA256SUMS.txt](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/download/v1.4/SHA256SUMS.txt)
 核对校验值。
 
 ## 三步上手

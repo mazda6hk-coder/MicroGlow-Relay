@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """1.4：Codex 多智能体的 agent_message 入站适配。
 
 PGE 那批 worker 全部失败在 `暂不支持的 input 类型：agent_message`：

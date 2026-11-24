@@ -3,6 +3,34 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4] - 2026-11-24
+
+Slug stabilisation and sub-agent input adaptation.
+
+### Fixed
+
+- **Configuration slugs are now frozen at first assignment.** Previously the slug
+  was recomputed on every catalog export (model name plus an id suffix on
+  collisions), so adding or removing a duplicate-named profile, or splitting a
+  parent model into channels, could rename an existing profile and make recorded
+  sessions fail with "model not found". Slugs are now persisted in the settings
+  file and never recomputed. Older settings files without a slug are backfilled
+  once on load using the previous algorithm, so an upgrade does not break
+  existing sessions.
+- **`agent_message` input type** used by Codex multi-agent dispatch is now folded
+  into a plain user message for Chat Completions and Anthropic upstreams instead
+  of being rejected by the input-type allowlist. The two text segments
+  (`input_text` and `encrypted_content`) are preserved and annotated with sender
+  and recipient session ids. Native passthrough keeps the original payload
+  untouched.
+- Installer: `installer/TelemetryConsent.iss` used `;` comments in a Pascal
+  include, which made Inno Setup fail with `'BEGIN' expected`; switched to `//`.
+
+### Tests
+
+- Added `test_slug_stability` (10) and `test_agent_message` (12); router,
+  native-passthrough and friendly-name suites unchanged and green.
+
 ## [1.3] - 2026-11-23
 
 Native model passthrough. When no configured profile matches a native Codex
@@ -114,3 +142,4 @@ binary only; this release publishes the source, documentation and license files.
 [1.3]: https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.3
 [1.2]: https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.2
 [1.1]: https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.1
+[1.4]: https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.4

@@ -4,10 +4,10 @@
 
 Documentation site: https://mazda6hk-coder.github.io/MicroGlow-Relay/
 
-**[**Download Relay 1.3 for Windows**](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.3)
+**[**Download Relay 1.4 for Windows**](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.4)
 · [Source](#from-source) · [Docs](https://mazda6hk-coder.github.io/MicroGlow-Relay/)**
 <sub>Unsigned installer: Windows may show a SmartScreen warning. Verify the SHA-256 on the
-[release page](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.3).</sub>
+[release page](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.4).</sub>
 
 A local AI model gateway for Windows. Relay listens on `127.0.0.1:4141` and lets
 Codex (OpenAI Responses) and Claude Code (Anthropic Messages) reach third-party
@@ -17,7 +17,7 @@ channel failover handled quietly.
 [![Platform](https://img.shields.io/badge/platform-Windows%20x64-4a5a68?style=flat-square)](#platform-and-requirements)
 [![License](https://img.shields.io/badge/license-Apache--2.0-4a5a68?style=flat-square)](LICENSE)
 [![Languages](https://img.shields.io/badge/interface-8%20languages-4a5a68?style=flat-square)](#interface)
-[![Version](https://img.shields.io/badge/version-1.3-4a5a68?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.4-4a5a68?style=flat-square)](CHANGELOG.md)
 
 <img src="docs/images/social-preview-1280x640.png" alt="MicroGlow Relay — use third-party models in Codex and Claude Code" width="100%">
 
@@ -44,7 +44,7 @@ resets.
 ## Install
 
 Download the installer from the
-[Releases page](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.3),
+[Releases page](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/tag/v1.4),
 or install it with the Windows Package Manager:
 
 ```powershell
@@ -53,7 +53,7 @@ winget install MicroGlow.MicroGlowRelay
 
 The installer is not code-signed, so Windows may show a SmartScreen prompt.
 Verify the download against
-[SHA256SUMS.txt](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/download/v1.3/SHA256SUMS.txt).
+[SHA256SUMS.txt](https://github.com/mazda6hk-coder/MicroGlow-Relay/releases/download/v1.4/SHA256SUMS.txt).
 
 ## Quick start
 

@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2026 Zhengzhou Weiguang Intelligent Technology Center
+# SPDX-License-Identifier: Apache-2.0
 """1.4：配置 slug 一经定名即冻结。
 
 回归的是 11-18 那批「模型不存在」404：slug 曾是派生值（模型名 + 孪生时的 id 尾缀），

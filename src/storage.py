@@ -461,14 +461,20 @@ class Settings:
                         continue
                     own = dict(source, **clean)
                     own.update(secret=encrypted, channels=[channel], channel_secrets=[{"secret": encrypted}])
+                    # clean 来自界面草稿，slug 可能是空串——不能让它覆盖已经定下的名字。
+                    own["slug"] = (str(own.get("slug") or "").strip()
+                                   or str(source.get("slug") or "").strip())
                     if order == 0 and len(channels) == 1:
                         own["id"] = profile_id
+                        if not own["slug"]:
+                            others = [p for p in self.data["profiles"] if p["id"] != profile_id]
+                            own["slug"] = assign_slug(own, others)
                         self.data["profiles"] = [own if p["id"] == profile_id else p for p in self.data["profiles"]]
                     else:
                         own["id"] = "model-" + uuid.uuid4().hex[:12]
-                        used = {str(p.get("slug") or "") for p in self.data["profiles"]}
-                        if str(own.get("slug") or "") in used:
-                            own["slug"] = assign_slug(own, self.data["profiles"])
+                        # 拆出来的新配置必须另起一个名字，否则与源配置撞车。
+                        others = [p for p in self.data["profiles"] if p["id"] != own["id"]]
+                        own["slug"] = assign_slug(own, others)
                         self.data["profiles"].append(own)
                         if order == 0:
                             channels.pop(index); secrets.pop(index)
